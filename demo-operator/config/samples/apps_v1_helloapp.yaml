@@ -1,0 +1,7 @@
+apiVersion: apps.anupam.com/v1
+kind: HelloApp
+metadata:
+  name: helloapp-sample
+spec:
+  image: "anupamgogoi/mock-app"
+  size: 1

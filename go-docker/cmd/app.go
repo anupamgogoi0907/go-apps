@@ -22,7 +22,8 @@ func ReadFile() {
 	ch := make(chan string)
 	go ProcessLine(ch)
 
-	file, err := os.Open("/Users/agogoi/git/anupamgogoi0907/go-apps/go-docker/go.sum")
+	fileName, _ := os.Getwd()
+	file, err := os.Open(fileName + "/go.sum")
 	if err != nil {
 		log.Panicln(err)
 	}
@@ -33,4 +34,7 @@ func ReadFile() {
 		time.Sleep(time.Second * 5)
 		ch <- scanner.Text()
 	}
+}
+func main() {
+	ReadFile()
 }

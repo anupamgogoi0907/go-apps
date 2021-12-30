@@ -35,6 +35,3 @@ func ReadFile() {
 		ch <- scanner.Text()
 	}
 }
-func main() {
-	ReadFile()
-}

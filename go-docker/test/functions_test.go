@@ -1,9 +1,8 @@
-package main
+package test
 
 import (
 	"fmt"
-	_ "github.com/docker/docker/api/types"
-	_ "github.com/docker/docker/client"
+	"testing"
 )
 
 // Client1 Experiment.
@@ -32,7 +31,7 @@ func FromEnv2(c *Client1) int {
 	return 10
 }
 
-func main() {
+func TestFunctionType(t *testing.T) {
 	var f1 Opt1
 	f1 = FromEnv1
 	fmt.Printf("%T\n", f1)

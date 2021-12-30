@@ -1,10 +1,11 @@
-package main
+package test
 
 import (
 	"bufio"
 	"fmt"
 	"log"
 	"os"
+	"testing"
 	"time"
 )
 
@@ -18,12 +19,12 @@ func ProcessLine(ch chan string) {
 	}
 
 }
-func ReadFile() {
+func TestReadFile(t *testing.T) {
 	ch := make(chan string)
 	go ProcessLine(ch)
 
 	fileName, _ := os.Getwd()
-	file, err := os.Open(fileName + "/go.sum")
+	file, err := os.Open(fileName + "/testfile.txt")
 	if err != nil {
 		log.Panicln(err)
 	}

@@ -28,7 +28,7 @@ func TestBufferedChannel(t *testing.T) {
 
 	go PrintResult(results)
 
-	// Below workers (threads) will read data from the same channel i.e. jobs and put the results to the same channel results.
+	// Below workers (threads) will read data from the same channel(queue) i.e. jobs and put the results to the same channel results.
 	go Worker(1, jobs, results)
 	go Worker(2, jobs, results)
 

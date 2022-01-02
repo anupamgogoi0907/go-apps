@@ -10,19 +10,18 @@ var jobs chan model.Job
 var results chan model.Result
 
 type WorkerPool struct {
-	CurDir     string
-	BufferSize int
+	CurDir string
 }
 
-func (wp *WorkerPool) configurePool() {
-	jobs = make(chan model.Job, wp.BufferSize)
-	results = make(chan model.Result, wp.BufferSize)
+func (wp *WorkerPool) configurePool(bufferSize int) {
+	jobs = make(chan model.Job, bufferSize)
+	results = make(chan model.Result, bufferSize)
 }
 
 func (wp *WorkerPool) Run() {
-	wp.configurePool()
 	files := GetFilesOfCurrentDirectory(wp.CurDir)
-	log.Println(len(files))
+	bufferSize := len(files)
+	wp.configurePool(bufferSize)
 
 }
 

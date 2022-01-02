@@ -6,6 +6,13 @@ import (
 	"testing"
 )
 
+func TestRun(t *testing.T) {
+	wp := pool.WorkerPool{
+		CurDir: "/Users/agogoi/git/anupamgogoi0907/go-apps/go-docker/test",
+	}
+	wp.Run()
+}
+
 func TestGetFilesOfCurrentDirectory(t *testing.T) {
 	arr := pool.GetFilesOfCurrentDirectory("/Users/agogoi/git/anupamgogoi0907/go-apps/go-docker/test")
 	for _, f := range arr {

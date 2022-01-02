@@ -1,0 +1,14 @@
+package test
+
+import (
+	"fmt"
+	"github.com/anupamgogoi0907/go-apps/go-docker/pkg/pool"
+	"testing"
+)
+
+func TestGetFilesOfCurrentDirectory(t *testing.T) {
+	arr := pool.GetFilesOfCurrentDirectory("/Users/agogoi/git/anupamgogoi0907/go-apps/go-docker/test")
+	for _, f := range arr {
+		fmt.Println(f)
+	}
+}

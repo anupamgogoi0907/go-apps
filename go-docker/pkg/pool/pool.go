@@ -14,6 +14,7 @@ var results chan model.Result
 type WorkerPool struct {
 	CurDir      string
 	NoOfWorkers int
+	waitGroup   *sync.WaitGroup
 }
 
 // configurePool Configure the channels.
@@ -24,11 +25,11 @@ func (wp *WorkerPool) configurePool(bufferSize int) {
 
 // Run the main point of entry to the code.
 func (wp *WorkerPool) Run() {
+	wp.waitGroup = &sync.WaitGroup{}
 	files := GetFilesOfCurrentDirectory(wp.CurDir)
 	wp.configurePool(len(files))
-	go wp.allocateJobs(files)
+	wp.allocateJobs(files)
 	wp.createWorkerPool()
-
 	wp.result()
 }
 
@@ -46,16 +47,15 @@ func (wp *WorkerPool) allocateJobs(files []string) {
 
 // createWorkerPool it creates the provided no of workers.
 func (wp *WorkerPool) createWorkerPool() {
-	var wg sync.WaitGroup
 	for i := 0; i < wp.NoOfWorkers; i++ {
-		wg.Add(1)
-		go wp.worker(&wg)
+		wp.waitGroup.Add(1)
+		go wp.worker()
 	}
-	wg.Wait()
+	wp.waitGroup.Wait()
 	close(results)
 }
 
-func (wp *WorkerPool) worker(wg *sync.WaitGroup) {
+func (wp *WorkerPool) worker() {
 	for job := range jobs {
 		fmt.Println("Processing file: ", job.FilePath)
 		res := model.Result{
@@ -63,7 +63,7 @@ func (wp *WorkerPool) worker(wg *sync.WaitGroup) {
 		}
 		results <- res
 	}
-	wg.Done()
+	wp.waitGroup.Done()
 }
 func (wp *WorkerPool) result() {
 	for result := range results {

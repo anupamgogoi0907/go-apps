@@ -1,25 +1,47 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/client"
+	"sync"
 )
 
+var jobs = make(chan int, 10)
+var results = make(chan int, 10)
+
+func worker(wg *sync.WaitGroup) {
+	for job := range jobs {
+		output := 1000 * job
+		results <- output
+	}
+	wg.Done()
+}
+func createWorkerPool(noOfWorkers int) {
+	var wg sync.WaitGroup
+	for i := 0; i < noOfWorkers; i++ {
+		wg.Add(1)
+		go worker(&wg)
+	}
+	wg.Wait()
+	close(results)
+}
+func allocate(noOfJobs int) {
+	for i := 0; i < noOfJobs; i++ {
+		jobs <- i
+	}
+	close(jobs)
+}
+func result() {
+	for result := range results {
+		fmt.Println(result)
+	}
+}
 func main() {
-	ctx := context.Background()
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-	if err != nil {
-		panic(err)
-	}
 
-	containers, err := cli.ContainerList(ctx, types.ContainerListOptions{})
-	if err != nil {
-		panic(err)
-	}
+	noOfJobs := 1000
+	go allocate(noOfJobs)
 
-	for _, container := range containers {
-		fmt.Println(container.Names)
-	}
+	go result()
+	noOfWorkers := 10
+	createWorkerPool(noOfWorkers)
+
 }

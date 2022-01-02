@@ -8,7 +8,8 @@ import (
 
 func TestRun(t *testing.T) {
 	wp := pool.WorkerPool{
-		CurDir: "/Users/agogoi/git/anupamgogoi0907/go-apps/go-docker/test",
+		CurDir:      "/Users/agogoi/git/anupamgogoi0907/go-apps/go-docker/test",
+		NoOfWorkers: 10,
 	}
 	wp.Run()
 }

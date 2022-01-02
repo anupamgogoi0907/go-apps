@@ -1,4 +1,4 @@
-module github.com/anupamgogoi0907/go-apps/tree/master/go-docker
+module github.com/anupamgogoi0907/go-apps/go-docker
 
 go 1.17
 

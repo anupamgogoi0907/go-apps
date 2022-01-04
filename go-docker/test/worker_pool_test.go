@@ -52,6 +52,30 @@ func TestWP(t *testing.T) {
 	}
 	go s.allocate()
 	go s.result()
-	//s.createWorkerPool()
+	s.createWorkerPool()
 
+}
+
+func TestUnbuffered(t *testing.T) {
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+
+	ch := make(chan int)
+
+	go func(wg *sync.WaitGroup) {
+		fmt.Println("Function A")
+		ch <- 10
+		wg.Done()
+	}(&wg)
+
+	go func(wg *sync.WaitGroup) {
+		fmt.Println("Function B")
+		ch <- 10
+		wg.Done()
+	}(&wg)
+
+	for i := 0; i < 2; i++ {
+		fmt.Println(<-ch)
+	}
+	wg.Wait()
 }

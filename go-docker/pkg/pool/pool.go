@@ -3,8 +3,7 @@ package pool
 import (
 	"fmt"
 	"github.com/anupamgogoi0907/go-apps/go-docker/pkg/model"
-	"io/ioutil"
-	"log"
+	"github.com/anupamgogoi0907/go-apps/go-docker/pkg/utility"
 	"sync"
 )
 
@@ -17,20 +16,23 @@ type WorkerPool struct {
 	waitGroup   *sync.WaitGroup
 }
 
-// configurePool Configure the channels.
-func (wp *WorkerPool) configurePool(bufferSize int) {
-	jobs = make(chan model.Job, bufferSize)
-	results = make(chan model.Result, bufferSize)
-}
-
 // Run the main point of entry to the code.
 func (wp *WorkerPool) Run() {
 	wp.waitGroup = &sync.WaitGroup{}
-	files := GetFilesOfCurrentDirectory(wp.CurDir)
+	files := utility.GetFilesOfCurrentDirectory(wp.CurDir)
+
+	go wp.result(len(files))
 	wp.configurePool(len(files))
 	wp.allocateJobs(files)
 	wp.createWorkerPool()
-	wp.result()
+
+	wp.waitGroup.Wait()
+}
+
+// configurePool Configure the channels.
+func (wp *WorkerPool) configurePool(bufferSize int) {
+	jobs = make(chan model.Job, bufferSize)
+	results = make(chan model.Result)
 }
 
 // allocateJobs allocates the jobs i.e. each log file is queued in the jobs channel
@@ -51,8 +53,6 @@ func (wp *WorkerPool) createWorkerPool() {
 		wp.waitGroup.Add(1)
 		go wp.worker()
 	}
-	wp.waitGroup.Wait()
-	close(results)
 }
 
 func (wp *WorkerPool) worker() {
@@ -65,25 +65,10 @@ func (wp *WorkerPool) worker() {
 	}
 	wp.waitGroup.Done()
 }
-func (wp *WorkerPool) result() {
-	for result := range results {
-		fmt.Println("Processed file: ", result.LogLines)
+func (wp *WorkerPool) result(noOfResults int) {
+	wp.waitGroup.Add(1)
+	for i := 0; i < noOfResults; i++ {
+		fmt.Println(<-results)
 	}
-}
-
-// GetFilesOfCurrentDirectory finds the files in the provided directory dir
-func GetFilesOfCurrentDirectory(dir string) (arr []string) {
-	if dir == "" {
-		log.Panicln("Empty string")
-	}
-	files, err := ioutil.ReadDir(dir)
-	if err != nil {
-		log.Panicln(err)
-	}
-
-	var arrFiles []string
-	for _, file := range files {
-		arrFiles = append(arrFiles, dir+file.Name())
-	}
-	return arrFiles
+	wp.waitGroup.Done()
 }

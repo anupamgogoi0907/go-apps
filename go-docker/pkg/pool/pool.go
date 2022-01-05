@@ -1,10 +1,11 @@
 package pool
 
 import (
-	"fmt"
 	"github.com/anupamgogoi0907/go-apps/go-docker/pkg/model"
 	"github.com/anupamgogoi0907/go-apps/go-docker/pkg/utility"
+	"log"
 	"sync"
+	"time"
 )
 
 var jobs chan model.Job
@@ -38,12 +39,13 @@ func (wp *WorkerPool) configurePool(bufferSize int) {
 // allocateJobs allocates the jobs i.e. each log file is queued in the jobs channel
 func (wp *WorkerPool) allocateJobs(files []string) {
 	for _, file := range files {
-		fmt.Println("Allocating file: ", file)
+		log.Println("Allocating file: ", file)
 		job := model.Job{
 			FilePath: file,
 		}
 		jobs <- job
 	}
+	log.Println("Files are allocated to workers successfully.")
 	close(jobs)
 }
 
@@ -51,13 +53,14 @@ func (wp *WorkerPool) allocateJobs(files []string) {
 func (wp *WorkerPool) createWorkerPool() {
 	for i := 0; i < wp.NoOfWorkers; i++ {
 		wp.waitGroup.Add(1)
-		go wp.worker()
+		go wp.processFileWorker()
 	}
 }
 
-func (wp *WorkerPool) worker() {
+func (wp *WorkerPool) processFileWorker() {
 	for job := range jobs {
-		fmt.Println("Processing file: ", job.FilePath)
+		log.Println("Processing file:", job.FilePath)
+		time.Sleep(time.Second * 2)
 		res := model.Result{
 			LogLines: job.FilePath,
 		}
@@ -68,7 +71,8 @@ func (wp *WorkerPool) worker() {
 func (wp *WorkerPool) result(noOfResults int) {
 	wp.waitGroup.Add(1)
 	for i := 0; i < noOfResults; i++ {
-		fmt.Println(<-results)
+		r := <-results
+		log.Println("Result:", r.LogLines)
 	}
 	wp.waitGroup.Done()
 }

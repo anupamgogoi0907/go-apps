@@ -71,6 +71,7 @@ func (wp *WorkerPool) processFileWorker() {
 func (wp *WorkerPool) result(noOfResults int) {
 	wp.waitGroup.Add(1)
 	for i := 0; i < noOfResults; i++ {
+		// This will block the execution of the loop until data is written to the results channel.
 		r := <-results
 		log.Println("Result:", r.LogLines)
 	}

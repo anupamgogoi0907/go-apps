@@ -6,7 +6,7 @@ import (
 )
 
 var chLines = make(chan []string, 5)
-var chResults = make(chan []string)
+var chResults = make(chan []string, 5)
 
 type FileWorkerPool struct {
 	FilePath           string
@@ -17,10 +17,20 @@ type FileWorkerPool struct {
 
 func (fw *FileWorkerPool) Run() {
 	fw.waitGroup = &sync.WaitGroup{}
+	// 1. Open the consumer
 	go fw.consumeResults()
+
+	// 2. Create the workers to read data from chLines and send results to chResults
 	fw.createWorkerPool()
+
+	// 3. Read file and send content to chLines
 	fw.ReadFileContent()
+
+	// 4. Wait for all goroutines to finish
 	fw.waitGroup.Wait()
+
+	// 5. Close the chResults
+	close(chResults)
 }
 func (fw *FileWorkerPool) createWorkerPool() {
 	for i := 1; i <= fw.NoOfWorkers; i++ {
@@ -45,10 +55,9 @@ func (fw *FileWorkerPool) produceResults(id int) {
 }
 
 func (fw *FileWorkerPool) consumeResults() {
-	fw.waitGroup.Add(1)
-	for i := 1; i <= 10; i++ {
-		fmt.Println(<-chResults)
+	for r := range chResults {
+		fmt.Println(r)
 		fmt.Println("Results consumed.")
 	}
-	fw.waitGroup.Done()
+
 }

@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"runtime"
-	"unsafe"
 )
 
 // GetFilesOfCurrentDirectory finds the files in the provided directory dir
@@ -52,7 +51,7 @@ func AppendLeadingSlash(str string) string {
 
 }
 
-func ReadFileContent(path string) {
+func ReadFileContent(path string, noOfLines int) {
 	if path == "" {
 		log.Panicln("No file provided.")
 	}
@@ -62,23 +61,20 @@ func ReadFileContent(path string) {
 	}
 	scanner := bufio.NewScanner(file)
 
-	lines := []string{}
-	l := 0
-	batch := 1
+	// Count the number of batches of lines sent to chLines
+	lineBuffer := []string{}
 	for scanner.Scan() {
-		l = l + 1
-		if l < 10000 {
-			lines = append(lines, scanner.Text())
-		} else {
-			log.Println("Processed Batch:", batch, "Size:", unsafe.Sizeof(lines))
-			lines = []string{}
-			l = 0
-			batch++
+		if len(lineBuffer) >= noOfLines {
+			log.Println("Send lineBuffer to chLines to be processed.")
+			lineBuffer = []string{}
 		}
+		line := scanner.Text()
+		lineBuffer = append(lineBuffer, line)
 
 	}
-	if len(lines) != 0 {
-		batch++
+	// Check if there is remaining lines in the lineBuffer.
+	if len(lineBuffer) != 0 {
+		lineBuffer = nil
 	}
 
 	defer file.Close()

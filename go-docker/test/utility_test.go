@@ -26,5 +26,5 @@ func TestAppendLeadingSlash(t *testing.T) {
 }
 
 func TestReadFileContents(t *testing.T) {
-	utility.ReadFileContent("/Users/agogoi/Downloads/OSISUB-305/http_access_2022-01-05.log")
+	utility.ReadFileContent("/Users/agogoi/Downloads/demodata.log", 1)
 }

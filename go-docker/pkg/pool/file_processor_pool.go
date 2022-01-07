@@ -19,17 +19,17 @@ type FileWorkerPool struct {
 
 func (fw *FileWorkerPool) Run() {
 	fw.waitGroup = &sync.WaitGroup{}
+	go fw.ReadFileContent()
 
 	// Allocate NoOfWorkers workers to process file lines.
 	for i := 1; i <= fw.NoOfWorkers; i++ {
 		fw.waitGroup.Add(1)
 		go fw.produceResultsWorker(i)
 	}
-	// Read file content.
-
-	go fw.ReadFileContent()
-	//go fw.consumeResultsWorker()
 	fw.waitGroup.Wait()
+
+	log.Println("Executed Workers########")
+	close(chResults)
 }
 
 // 10 produceResultsWorker are working concurrently to process data sent to chLines channel.
@@ -43,15 +43,14 @@ func (fw *FileWorkerPool) produceResultsWorker(workerId int) {
 	fw.waitGroup.Done()
 }
 func (fw *FileWorkerPool) consumeResultsWorker() {
-	fw.waitGroup.Add(1)
 	for r := range chResults {
 		log.Println(r)
 	}
-	fw.waitGroup.Done()
 }
 
 func (fw *FileWorkerPool) ReadFileContent() {
 	fw.waitGroup.Add(1)
+
 	if fw.FilePath == "" {
 		log.Panicln("No file provided.")
 	}
@@ -79,7 +78,6 @@ func (fw *FileWorkerPool) ReadFileContent() {
 		lineBuffer = nil
 	}
 	close(chLines)
-	fw.waitGroup.Done()
 	defer file.Close()
-
+	fw.waitGroup.Done()
 }

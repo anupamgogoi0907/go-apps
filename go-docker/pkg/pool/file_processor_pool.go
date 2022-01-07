@@ -25,8 +25,10 @@ func (fw *FileWorkerPool) Run() {
 		fw.waitGroup.Add(1)
 		go fw.produceResultsWorker(i)
 	}
-	fw.ReadFileContent()
+	// Read file content.
 
+	go fw.ReadFileContent()
+	//go fw.consumeResultsWorker()
 	fw.waitGroup.Wait()
 }
 
@@ -35,7 +37,6 @@ func (fw *FileWorkerPool) produceResultsWorker(workerId int) {
 	for l := range chLines {
 		// Add processing code.
 		log.Println("Worker:", workerId, "is processing.", l)
-		// Below call will block the for loop until someone processes the result.
 		//chResults <- []string{"Processed"}
 		log.Println("Worker:", workerId, "has processed.")
 	}
@@ -50,6 +51,7 @@ func (fw *FileWorkerPool) consumeResultsWorker() {
 }
 
 func (fw *FileWorkerPool) ReadFileContent() {
+	fw.waitGroup.Add(1)
 	if fw.FilePath == "" {
 		log.Panicln("No file provided.")
 	}
@@ -77,6 +79,7 @@ func (fw *FileWorkerPool) ReadFileContent() {
 		lineBuffer = nil
 	}
 	close(chLines)
+	fw.waitGroup.Done()
 	defer file.Close()
 
 }

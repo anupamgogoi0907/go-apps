@@ -2,11 +2,11 @@ package utility
 
 import (
 	"bufio"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"runtime"
+	"unsafe"
 )
 
 // GetFilesOfCurrentDirectory finds the files in the provided directory dir
@@ -62,9 +62,25 @@ func ReadFileContent(path string) {
 	}
 	scanner := bufio.NewScanner(file)
 
+	lines := []string{}
+	l := 0
+	batch := 1
 	for scanner.Scan() {
-		fmt.Println(scanner.Text())
+		l = l + 1
+		if l < 10000 {
+			lines = append(lines, scanner.Text())
+		} else {
+			log.Println("Processed Batch:", batch, "Size:", unsafe.Sizeof(lines))
+			lines = []string{}
+			l = 0
+			batch++
+		}
+
 	}
+	if len(lines) != 0 {
+		batch++
+	}
+
 	defer file.Close()
 
 }

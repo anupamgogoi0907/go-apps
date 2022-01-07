@@ -37,7 +37,7 @@ func (fw *FileWorkerPool) produceResultsWorker(workerId int) {
 		log.Println("Worker:", workerId, "is processing.", l)
 		// Below call will block the for loop until someone processes the result.
 		//chResults <- []string{"Processed"}
-		log.Println("Lines has been processed.")
+		log.Println("Worker:", workerId, "has processed.")
 	}
 	fw.waitGroup.Done()
 }

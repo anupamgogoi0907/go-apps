@@ -24,3 +24,7 @@ func TestAppendLeadingSlash(t *testing.T) {
 	str = utility.AppendLeadingSlash(str)
 	assert.Equal(t, "/Users/agogoi/git/anupamgogoi0907/go-apps/go-docker/test/", str)
 }
+
+func TestReadFileContents(t *testing.T) {
+	utility.ReadFileContent("/Users/agogoi/Downloads/OSISUB-305/http_access_2022-01-05.log")
+}

@@ -1,8 +1,11 @@
 package utility
 
 import (
+	"bufio"
+	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"runtime"
 )
 
@@ -46,5 +49,22 @@ func AppendLeadingSlash(str string) string {
 		}
 	}
 	return str
+
+}
+
+func ReadFileContent(path string) {
+	if path == "" {
+		log.Panicln("No file provided.")
+	}
+	file, err := os.Open(path)
+	if err != nil {
+		log.Panicln(err)
+	}
+	scanner := bufio.NewScanner(file)
+
+	for scanner.Scan() {
+		fmt.Println(scanner.Text())
+	}
+	defer file.Close()
 
 }

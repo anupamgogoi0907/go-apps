@@ -13,18 +13,15 @@ var chResults = make(chan []string, 5)
 type FileWorkerPool struct {
 	FilePath           string
 	NoOfLinesToProcess int
+	NoOfWorkers        int
 	waitGroup          *sync.WaitGroup
 }
 
 func (fw *FileWorkerPool) Run() {
 	fw.waitGroup = &sync.WaitGroup{}
 
-	// Allocate a goroutine to consume results.
-	go fw.consumeResultsWorker()
-
-	// Allocate 10 workers to process file lines.
-	noOfWorkers := 2
-	for i := 1; i <= noOfWorkers; i++ {
+	// Allocate NoOfWorkers workers to process file lines.
+	for i := 1; i <= fw.NoOfWorkers; i++ {
 		fw.waitGroup.Add(1)
 		go fw.produceResultsWorker(i)
 	}
@@ -37,20 +34,19 @@ func (fw *FileWorkerPool) Run() {
 func (fw *FileWorkerPool) produceResultsWorker(workerId int) {
 	for l := range chLines {
 		// Add processing code.
-		log.Println("Worker:", workerId, "is processing.", len(l))
-		//time.Sleep(time.Second * 2)
+		log.Println("Worker:", workerId, "is processing.", l)
 		// Below call will block the for loop until someone processes the result.
-		chResults <- []string{"Processed"}
+		//chResults <- []string{"Processed"}
 		log.Println("Lines has been processed.")
 	}
 	fw.waitGroup.Done()
 }
 func (fw *FileWorkerPool) consumeResultsWorker() {
-	//fw.waitGroup.Add(1)
+	fw.waitGroup.Add(1)
 	for r := range chResults {
 		log.Println(r)
 	}
-	//fw.waitGroup.Done()
+	fw.waitGroup.Done()
 }
 
 func (fw *FileWorkerPool) ReadFileContent() {
@@ -80,7 +76,7 @@ func (fw *FileWorkerPool) ReadFileContent() {
 		chLines <- lineBuffer
 		lineBuffer = nil
 	}
-
+	close(chLines)
 	defer file.Close()
 
 }

@@ -9,6 +9,7 @@ func TestRunFW(t *testing.T) {
 	fw := pool.FileWorkerPool{
 		FilePath:           "/Users/agogoi/Downloads/demodata.log",
 		NoOfLinesToProcess: 1,
+		NoOfWorkers:        2,
 	}
 	fw.Run()
 }

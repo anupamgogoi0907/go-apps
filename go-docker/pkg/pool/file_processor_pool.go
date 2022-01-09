@@ -13,11 +13,14 @@ type FileWorkerPool struct {
 	FilePath           string
 	NoOfLinesToProcess int
 	NoOfWorkers        int
+	TargetLocation     string
 	waitGroup          *sync.WaitGroup
 }
 
 func (fw *FileWorkerPool) Run() {
-	fw.waitGroup = &sync.WaitGroup{}
+	// 0. Validate input.
+	fw.validate()
+
 	// 1. Assign workers.
 	fw.createWorkerPool()
 
@@ -25,6 +28,22 @@ func (fw *FileWorkerPool) Run() {
 	fw.readFileContent()
 
 	fw.waitGroup.Wait()
+}
+
+func (fw *FileWorkerPool) validate() {
+	if fw.waitGroup == nil {
+		fw.waitGroup = &sync.WaitGroup{}
+	}
+	if fw.TargetLocation == "" {
+		pwd, _ := os.Getwd()
+		fw.TargetLocation = pwd
+	}
+	if fw.NoOfWorkers == 0 {
+		fw.NoOfWorkers = 2
+	}
+	if fw.NoOfLinesToProcess == 0 {
+		fw.NoOfLinesToProcess = 10000
+	}
 }
 
 // Create a worker pool.

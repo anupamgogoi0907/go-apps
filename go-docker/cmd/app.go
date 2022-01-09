@@ -7,6 +7,7 @@ func main() {
 		FilePath:           "/Users/agogoi/Downloads/demodata.log",
 		NoOfLinesToProcess: 3,
 		NoOfWorkers:        2,
+		TargetLocation:     "/Users/agogoi/Downloads/demo.log",
 	}
 	fw.Run()
 }

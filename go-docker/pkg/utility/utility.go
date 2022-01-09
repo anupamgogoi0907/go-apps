@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"strings"
 )
 
 // GetFilesOfCurrentDirectory finds the files in the provided directory dir
@@ -79,4 +80,30 @@ func ReadFileContent(path string, noOfLines int) {
 
 	defer file.Close()
 
+}
+func FindWord(line string, word string) bool {
+	found := false
+	if strings.Contains(line, word) {
+		found = true
+	}
+	return found
+}
+func CreateOrOpenFile(name string) *os.File {
+	pwd, err := os.Getwd()
+	if err != nil {
+		log.Panicln(err)
+	}
+	pwd = AppendLeadingSlash(pwd)
+	file, err := os.OpenFile(pwd+name, os.O_APPEND|os.O_CREATE|os.O_RDONLY|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Panicln(err)
+	}
+	return file
+}
+
+func AppendDataToFile(file *os.File, data string) {
+	_, err := file.WriteString(data)
+	if err != nil {
+		log.Panicln(err)
+	}
 }

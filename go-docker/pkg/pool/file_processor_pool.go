@@ -1,12 +1,13 @@
 package pool
 
 import (
-	"fmt"
+	"bufio"
+	"log"
+	"os"
 	"sync"
 )
 
 var chLines = make(chan []string, 5)
-var chResults = make(chan []string, 5)
 
 type FileWorkerPool struct {
 	FilePath           string
@@ -17,47 +18,59 @@ type FileWorkerPool struct {
 
 func (fw *FileWorkerPool) Run() {
 	fw.waitGroup = &sync.WaitGroup{}
-	// 1. Open the consumer
-	go fw.consumeResults()
-
-	// 2. Create the workers to read data from chLines and send results to chResults
+	// 1. Assign workers.
 	fw.createWorkerPool()
 
-	// 3. Read file and send content to chLines
-	fw.ReadFileContent()
+	// 2. Read large file
+	fw.readFileContent()
 
-	// 4. Wait for all goroutines to finish
 	fw.waitGroup.Wait()
-
-	// 5. Close the chResults
-	close(chResults)
 }
+
+// Create a worker pool.
 func (fw *FileWorkerPool) createWorkerPool() {
-	for i := 1; i <= fw.NoOfWorkers; i++ {
-		go fw.produceResults(i)
+	for w := 1; w <= fw.NoOfWorkers; w++ {
+		fw.waitGroup.Add(1)
+		go fw.worker(w)
 	}
-}
-func (fw *FileWorkerPool) ReadFileContent() {
-	for i := 1; i <= 10; i++ {
-		chLines <- []string{"Hello"}
-	}
-	close(chLines)
 }
 
-func (fw *FileWorkerPool) produceResults(id int) {
-	fw.waitGroup.Add(1)
-	for j := range chLines {
-		fmt.Println("Worker:", id, "is processing:", j)
-		chResults <- j
-		fmt.Println("Worker:", id, "has processed:", j)
+// Main processing logic goes here.
+func (fw *FileWorkerPool) worker(workerId int) {
+	for lines := range chLines {
+		log.Println("Worker", workerId, "is processing")
+		log.Println("Worker", workerId, "has processed", lines)
 	}
 	fw.waitGroup.Done()
 }
 
-func (fw *FileWorkerPool) consumeResults() {
-	for r := range chResults {
-		fmt.Println(r)
-		fmt.Println("Results consumed.")
+// Read file
+func (fw *FileWorkerPool) readFileContent() {
+	if fw.FilePath == "" {
+		log.Panicln("No file provided.")
 	}
+	file, err := os.Open(fw.FilePath)
+	if err != nil {
+		log.Panicln(err)
+	}
+	scanner := bufio.NewScanner(file)
 
+	// Count the number of batches of lines sent to chLines
+	lineBuffer := []string{}
+	for scanner.Scan() {
+		if len(lineBuffer) >= fw.NoOfLinesToProcess {
+			log.Println("Send lineBuffer to chLines to be processed.")
+			chLines <- lineBuffer
+			lineBuffer = []string{}
+		}
+		line := scanner.Text()
+		lineBuffer = append(lineBuffer, line)
+
+	}
+	// Check if there is remaining lines in the lineBuffer.
+	if len(lineBuffer) != 0 {
+		lineBuffer = nil
+	}
+	close(chLines)
+	defer file.Close()
 }

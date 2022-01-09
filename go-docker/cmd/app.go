@@ -5,7 +5,7 @@ import "github.com/anupamgogoi0907/go-apps/go-docker/pkg/pool"
 func main() {
 	fw := pool.FileWorkerPool{
 		FilePath:           "/Users/agogoi/Downloads/demodata.log",
-		NoOfLinesToProcess: 1,
+		NoOfLinesToProcess: 3,
 		NoOfWorkers:        2,
 	}
 	fw.Run()

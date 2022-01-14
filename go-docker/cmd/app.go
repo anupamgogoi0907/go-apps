@@ -23,9 +23,9 @@ func stage1(nums []int, wg *sync.WaitGroup) chan string {
 	result := make(chan string)
 	fmt.Println("Executing stage1.Target channel:", result)
 
-	worker := func() {
+	worker := func(workerId int) {
 		for _, n := range nums {
-			fmt.Println("Receiving data in stage1.Source channel:", nil)
+			fmt.Println("Receiving data in stage1,WorkerID", workerId, "Source channel:", nil)
 			v := strconv.Itoa(n) + "->stage1"
 			result <- v
 			fmt.Println("Sent data from stage1:", v, "Target channel:", result)
@@ -33,7 +33,7 @@ func stage1(nums []int, wg *sync.WaitGroup) chan string {
 		close(result)
 		wg.Done()
 	}
-	go worker()
+	go worker(1)
 	return result
 }
 
@@ -42,9 +42,9 @@ func stage2(in chan string, wg *sync.WaitGroup) chan string {
 	fmt.Println("Executing stage2.Source channel:", in, ",Target channel:", result)
 	wg.Add(1)
 
-	worker := func(in chan string) {
+	worker := func(workerId int, in chan string) {
 		for n := range in {
-			fmt.Println("Receiving data in stage2.Source channel:", in)
+			fmt.Println("Receiving data in stage2,WorkerID", workerId, "Source channel:", nil)
 			v := n + "->stage2"
 			result <- v
 			fmt.Println("Sent data from stage2:", v, ",Target channel:", result)
@@ -52,7 +52,7 @@ func stage2(in chan string, wg *sync.WaitGroup) chan string {
 		close(result)
 		wg.Done()
 	}
-	go worker(in)
+	go worker(1, in)
 
 	return result
 }
@@ -62,9 +62,9 @@ func stage3(in chan string, wg *sync.WaitGroup) chan string {
 	fmt.Println("Executing stage3.Source channel:", in, ",Target channel:", result)
 	wg.Add(1)
 
-	worker := func(in chan string) {
+	worker := func(workerId int, in chan string) {
 		for n := range in {
-			fmt.Println("Receiving data in stage3.Source channel:", in)
+			fmt.Println("Receiving data in stage3,WorkerID", workerId, "Source channel:", nil)
 			v := n + "->stage3"
 			result <- v
 			fmt.Println("Sent data from stage3:", v, ",Target channel:", result)
@@ -72,6 +72,6 @@ func stage3(in chan string, wg *sync.WaitGroup) chan string {
 		close(result)
 		wg.Done()
 	}
-	go worker(in)
+	go worker(1, in)
 	return result
 }

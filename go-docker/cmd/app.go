@@ -21,14 +21,13 @@ func main() {
 func stage1(nums []int, wg *sync.WaitGroup) chan string {
 	wg.Add(1)
 	result := make(chan string)
-	fmt.Println("Executing stage1.Target channel:", result)
 
 	worker := func(workerId int) {
 		for _, n := range nums {
-			fmt.Println("Receiving data in stage1,WorkerID", workerId, ",Source channel:", nil)
+			fmt.Printf("RECEIVING:Stage1,Worker:%d,Data:%d,Source Channel:%x,Target Channel:%x\n", workerId, n, nil, result)
 			v := strconv.Itoa(n) + "->stage1"
 			result <- v
-			fmt.Println("Sent data from stage1:", v, "Target channel:", result)
+			fmt.Printf("SENT:Stage1,Worker:%d,Data:%s,Target Channel:%x\n", workerId, v, result)
 		}
 		close(result)
 		wg.Done()
@@ -39,15 +38,14 @@ func stage1(nums []int, wg *sync.WaitGroup) chan string {
 
 func stage2(in chan string, wg *sync.WaitGroup) chan string {
 	result := make(chan string)
-	fmt.Println("Executing stage2.Source channel:", in, ",Target channel:", result)
 	wg.Add(1)
 
 	worker := func(workerId int, in chan string) {
 		for n := range in {
-			fmt.Println("Receiving data in stage2,WorkerID", workerId, ",Source channel:", nil)
+			fmt.Printf("RECEIVING.Stage2,Worker:%d,Data:%s,Source Channel:%x,Target Channel:%x\n", workerId, n, in, result)
 			v := n + "->stage2"
 			result <- v
-			fmt.Println("Sent data from stage2:", v, ",Target channel:", result)
+			fmt.Printf("SENT:Stage2,Worker:%d,Data:%s,Target Channel:%x\n", workerId, v, result)
 		}
 		close(result)
 		wg.Done()
@@ -59,15 +57,14 @@ func stage2(in chan string, wg *sync.WaitGroup) chan string {
 
 func stage3(in chan string, wg *sync.WaitGroup) chan string {
 	result := make(chan string)
-	fmt.Println("Executing stage3.Source channel:", in, ",Target channel:", result)
 	wg.Add(1)
 
 	worker := func(workerId int, in chan string) {
 		for n := range in {
-			fmt.Println("Receiving data in stage3,WorkerID", workerId, ",Source channel:", nil)
+			fmt.Printf("RECEIVING.Stage3,Worker:%d,Data:%s,Source Channel:%x,Target Channel:%x\n", workerId, n, in, result)
 			v := n + "->stage3"
 			result <- v
-			fmt.Println("Sent data from stage3:", v, ",Target channel:", result)
+			fmt.Printf("SENT:Stage3,Worker:%d,Data:%s,Target Channel:%x\n", workerId, v, result)
 		}
 		close(result)
 		wg.Done()

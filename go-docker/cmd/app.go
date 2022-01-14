@@ -25,7 +25,7 @@ func stage1(nums []int, wg *sync.WaitGroup) chan string {
 
 	worker := func(workerId int) {
 		for _, n := range nums {
-			fmt.Println("Receiving data in stage1,WorkerID", workerId, "Source channel:", nil)
+			fmt.Println("Receiving data in stage1,WorkerID", workerId, ",Source channel:", nil)
 			v := strconv.Itoa(n) + "->stage1"
 			result <- v
 			fmt.Println("Sent data from stage1:", v, "Target channel:", result)
@@ -44,7 +44,7 @@ func stage2(in chan string, wg *sync.WaitGroup) chan string {
 
 	worker := func(workerId int, in chan string) {
 		for n := range in {
-			fmt.Println("Receiving data in stage2,WorkerID", workerId, "Source channel:", nil)
+			fmt.Println("Receiving data in stage2,WorkerID", workerId, ",Source channel:", nil)
 			v := n + "->stage2"
 			result <- v
 			fmt.Println("Sent data from stage2:", v, ",Target channel:", result)
@@ -64,7 +64,7 @@ func stage3(in chan string, wg *sync.WaitGroup) chan string {
 
 	worker := func(workerId int, in chan string) {
 		for n := range in {
-			fmt.Println("Receiving data in stage3,WorkerID", workerId, "Source channel:", nil)
+			fmt.Println("Receiving data in stage3,WorkerID", workerId, ",Source channel:", nil)
 			v := n + "->stage3"
 			result <- v
 			fmt.Println("Sent data from stage3:", v, ",Target channel:", result)

@@ -8,13 +8,16 @@ import (
 
 func main() {
 	wg := sync.WaitGroup{}
-	s1 := stage1([]int{1, 2, 3}, &wg)
-	s2 := stage2(s1, &wg)
-	s3 := stage3(s2, &wg)
+	result1 := stage1([]int{1, 2, 3}, &wg)
 
-	for d := range s3 {
-		fmt.Println("### Final Source channel:", s3, ",Data:", d)
-	}
+	// stage2 is polling on result1
+	result2 := stage2(result1, &wg)
+
+	// stage3 is polling on result2
+	result3 := stage3(result2, &wg)
+
+	// finish is polling on result3
+	finish(result3)
 	wg.Wait()
 }
 
@@ -71,4 +74,10 @@ func stage3(in chan string, wg *sync.WaitGroup) chan string {
 	}
 	go worker(1, in)
 	return result
+}
+
+func finish(in chan string) {
+	for d := range in {
+		fmt.Println("### Final Source channel:", in, ",Data:", d)
+	}
 }

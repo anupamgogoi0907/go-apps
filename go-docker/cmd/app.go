@@ -36,7 +36,7 @@ func stage1(in chan string, wg *sync.WaitGroup) chan string {
 
 	worker := func(workerId int, in chan string) {
 		for n := range in {
-			fmt.Printf("RECEIVING.Stage1,Worker:%d,Data:%s,Source Channel:%x,Target Channel:%x\n", workerId, n, in, result)
+			fmt.Printf("RECEIVING:Stage1,Worker:%d,Data:%s,Source Channel:%x,Target Channel:%x\n", workerId, n, in, result)
 			v := n + "->stage1"
 			result <- v
 			fmt.Printf("SENT:Stage1,Worker:%d,Data:%s,Target Channel:%x\n", workerId, v, result)
@@ -55,7 +55,7 @@ func stage2(in chan string, wg *sync.WaitGroup) chan string {
 
 	worker := func(workerId int, in chan string) {
 		for n := range in {
-			fmt.Printf("RECEIVING.Stage2,Worker:%d,Data:%s,Source Channel:%x,Target Channel:%x\n", workerId, n, in, result)
+			fmt.Printf("RECEIVING:Stage2,Worker:%d,Data:%s,Source Channel:%x,Target Channel:%x\n", workerId, n, in, result)
 			v := n + "->stage2"
 			result <- v
 			fmt.Printf("SENT:Stage2,Worker:%d,Data:%s,Target Channel:%x\n", workerId, v, result)
@@ -74,7 +74,7 @@ func stage3(in chan string, wg *sync.WaitGroup) chan string {
 
 	worker := func(workerId int, in chan string) {
 		for n := range in {
-			fmt.Printf("RECEIVING.Stage3,Worker:%d,Data:%s,Source Channel:%x,Target Channel:%x\n", workerId, n, in, result)
+			fmt.Printf("RECEIVING:Stage3,Worker:%d,Data:%s,Source Channel:%x,Target Channel:%x\n", workerId, n, in, result)
 			v := n + "->stage3"
 			result <- v
 			fmt.Printf("SENT:Stage3,Worker:%d,Data:%s,Target Channel:%x\n", workerId, v, result)

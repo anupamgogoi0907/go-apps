@@ -6,11 +6,11 @@ import (
 	"sync"
 )
 
-func main() {
-	wg := sync.WaitGroup{}
-	pipeline([]int{1, 2}, &wg)
-	wg.Wait()
-}
+//func main() {
+//	wg := sync.WaitGroup{}
+//	pipeline([]int{1, 2}, &wg)
+//	wg.Wait()
+//}
 
 func pipeline(data []int, wg *sync.WaitGroup) {
 	wg.Add(1)

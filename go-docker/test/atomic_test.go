@@ -18,25 +18,39 @@ func TestAtomic(t *testing.T) {
 
 func p1(n *uint64, wg *sync.WaitGroup) chan int {
 	ch := make(chan int)
-	worker := func(wg *sync.WaitGroup) {
-		ch <- 10
+	worker := func(workerId int, wg *sync.WaitGroup) {
+		for d := 1; d <= 3; d++ {
+			ch <- d
+		}
 		wg.Done()
-		atomic.AddUint64(n, 10000)
-		fmt.Println("Done")
+		atomic.AddUint64(n, 1)
 	}
 
-	wg.Add(1)
-	go worker(wg)
+	// Workers
+	for i := 1; i <= 2; i++ {
+		wg.Add(1)
+		go worker(i, wg)
+	}
 	return ch
 }
 
 func p2(ch chan int, n *uint64, wg *sync.WaitGroup) {
-	worker := func(wg *sync.WaitGroup) {
-		<-ch
-		fmt.Println(atomic.LoadUint64(n))
-		wg.Done()
+	worker := func(n *uint64, wg *sync.WaitGroup) {
+		flag := true
+		for flag {
+			select {
+			case d := <-ch:
+				fmt.Println(d)
+			default:
+				c := atomic.LoadUint64(n)
+				if c == 2 {
+					fmt.Println("### All done:", c)
+					flag = false
+				}
+			}
+
+		}
 	}
 
-	wg.Add(1)
-	go worker(wg)
+	go worker(n, wg)
 }

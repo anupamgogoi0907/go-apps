@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"sync"
+	"sync/atomic"
 )
 
 var result = make(chan string)
@@ -11,25 +12,26 @@ var result = make(chan string)
 func main() {
 	wg := sync.WaitGroup{}
 
-	out, done := processor1(&wg)
-	processor2(out, done, &wg)
+	out, count := processor1(&wg)
+	processor2(out, &count, &wg)
 	wg.Wait()
 }
 
-func processor1(wg *sync.WaitGroup) (chan int, chan bool) {
+func processor1(wg *sync.WaitGroup) (chan int, uint64) {
 	const NumSenders = 2
 	ch := make(chan int)
-	done := make(chan bool, NumSenders)
+
+	var countFinishedWorkers uint64
 	// Worker
-	worker := func(workerId int, out chan int, wg *sync.WaitGroup) {
+	worker := func(workerId int, ch chan int, wg *sync.WaitGroup) {
 		n := rand.Intn(5)
 		fmt.Printf("### Worker:%d, Total Values:%d\n", workerId, n)
 		for i := 0; i < n; i++ {
-			fmt.Printf("Value:%d\n", i)
-			out <- i
+			fmt.Printf("Sending value:%d\n", i)
+			ch <- i
 		}
 		// Signal something that it has done processing.
-		//done <- true
+		atomic.AddUint64(&countFinishedWorkers, 1)
 		wg.Done()
 	}
 
@@ -38,19 +40,22 @@ func processor1(wg *sync.WaitGroup) (chan int, chan bool) {
 		wg.Add(1)
 		go worker(i, ch, wg)
 	}
-	return ch, done
+	return ch, countFinishedWorkers
 }
 
-func processor2(ch chan int, done chan bool, wg *sync.WaitGroup) {
+func processor2(ch chan int, count *uint64, wg *sync.WaitGroup) {
 	consumer := func() {
 		for {
-			select {
-			case d := <-ch:
-				fmt.Println("RECEIVED:", d)
+			c := atomic.LoadUint64(count)
+			fmt.Println("### Receiving #####", c)
+			if c == 2 {
+				return
 			}
-			//wg.Done()
+			select {
+			case r := <-ch:
+				fmt.Println("Received:", r)
+			}
 		}
 	}
-	//wg.Add(1)
 	go consumer()
 }

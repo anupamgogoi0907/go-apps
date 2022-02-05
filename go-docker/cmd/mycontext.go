@@ -50,9 +50,10 @@ func main() {
 	s1(stageSource, stage1)
 
 	// Stage 2
+	var n2 uint64
 	stage2 := &Stage{
 		noOfWorkers: 2,
-		doneWorkers: &n1,
+		doneWorkers: &n2,
 		ctx:         ctx,
 		cancelFunc:  cancel,
 		wg:          &wg,
@@ -88,11 +89,13 @@ func s1(prev *Stage, cur *Stage) {
 			select {
 			case d := <-prev.data:
 				fmt.Printf("<<< Stage:%s, Worker:%d, Data:%d\n", "s1", workerId, d)
+				cur.data <- d * 10
 			default:
 				c := atomic.LoadUint64(prev.doneWorkers)
 				if int(c) == prev.noOfWorkers {
 					flag = false
-					fmt.Println("### Received all in stage P1. Stopping P1.")
+					fmt.Println("### Received all in stage s1. Stopping s1.")
+					atomic.AddUint64(cur.doneWorkers, 1)
 					cur.wg.Done()
 				}
 			}
@@ -105,5 +108,24 @@ func s1(prev *Stage, cur *Stage) {
 }
 
 func s2(prev *Stage, cur *Stage) {
-
+	worker := func(workerId int, prev *Stage, cur *Stage) {
+		flag := true
+		for flag {
+			select {
+			case d := <-prev.data:
+				fmt.Printf("<<< Stage:%s, Worker:%d, Data:%d\n", "s2", workerId, d)
+			default:
+				c := atomic.LoadUint64(prev.doneWorkers)
+				if int(c) == prev.noOfWorkers {
+					flag = false
+					fmt.Println("### Received all in stage s2. Stopping s2.")
+					cur.wg.Done()
+				}
+			}
+		}
+	}
+	for w := 1; w <= cur.noOfWorkers; w++ {
+		cur.wg.Add(1)
+		go worker(w, prev, cur)
+	}
 }

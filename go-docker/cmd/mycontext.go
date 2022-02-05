@@ -23,6 +23,7 @@ func main() {
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 
+	// Source
 	var n uint64
 	s := &Stage{
 		noOfWorkers: 2,
@@ -30,16 +31,26 @@ func main() {
 		ctx:         ctx,
 		cancelFunc:  cancel,
 		wg:          &wg,
+		data:        make(chan int),
+		error:       make(chan string),
 	}
 	IngestData(s)
-	s1(s)
+
+	// Stage 1
+	var n1 uint64
+	s1(s, &Stage{
+		noOfWorkers: 2,
+		doneWorkers: &n1,
+		ctx:         ctx,
+		cancelFunc:  cancel,
+		wg:          &wg,
+		data:        make(chan int),
+		error:       make(chan string),
+	})
 	wg.Wait()
 }
 
 func IngestData(s *Stage) {
-	// Initialize the channel to send data.
-	s.data = make(chan int)
-
 	worker := func(workerId int, s *Stage) {
 		n := rand.Intn(10)
 		for d := 0; d <= n; d++ {
@@ -57,27 +68,29 @@ func IngestData(s *Stage) {
 
 }
 
-func s1(s *Stage) {
-	worker := func(workerId int, s *Stage) {
+func s1(prev *Stage, cur *Stage) {
+	worker := func(workerId int, prev *Stage, cur *Stage) {
 		flag := true
 		for flag {
 			select {
-			case d := <-s.data:
+			case d := <-prev.data:
 				fmt.Printf("<<< Stage:%s, Worker:%d, Data:%d\n", "s1", workerId, d)
 			default:
-				c := atomic.LoadUint64(s.doneWorkers)
-				if int(c) == s.noOfWorkers {
+				c := atomic.LoadUint64(prev.doneWorkers)
+				if int(c) == prev.noOfWorkers {
 					flag = false
-					fmt.Println("<<< Received all in stage P1. Stopping P1.")
-					s.wg.Done()
+					fmt.Println("### Received all in stage P1. Stopping P1.")
+					cur.wg.Done()
 				}
 			}
 		}
 	}
-	s.wg.Add(1)
-	go worker(1, s)
+	for w := 1; w <= cur.noOfWorkers; w++ {
+		cur.wg.Add(1)
+		go worker(w, prev, cur)
+	}
 }
 
-func s2(s *Stage) {
+func s2(prev *Stage, cur *Stage) {
 
 }

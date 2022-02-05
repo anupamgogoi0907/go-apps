@@ -25,7 +25,7 @@ func main() {
 
 	// Source
 	var n uint64
-	s := &Stage{
+	stageSource := &Stage{
 		noOfWorkers: 2,
 		doneWorkers: &n,
 		ctx:         ctx,
@@ -34,11 +34,11 @@ func main() {
 		data:        make(chan int),
 		error:       make(chan string),
 	}
-	IngestData(s)
+	IngestData(stageSource)
 
 	// Stage 1
 	var n1 uint64
-	s1(s, &Stage{
+	stage1 := &Stage{
 		noOfWorkers: 2,
 		doneWorkers: &n1,
 		ctx:         ctx,
@@ -46,11 +46,24 @@ func main() {
 		wg:          &wg,
 		data:        make(chan int),
 		error:       make(chan string),
-	})
+	}
+	s1(stageSource, stage1)
+
+	// Stage 2
+	stage2 := &Stage{
+		noOfWorkers: 2,
+		doneWorkers: &n1,
+		ctx:         ctx,
+		cancelFunc:  cancel,
+		wg:          &wg,
+		data:        make(chan int),
+		error:       make(chan string),
+	}
+	s2(stage1, stage2)
 	wg.Wait()
 }
 
-func IngestData(s *Stage) {
+func IngestData(cur *Stage) {
 	worker := func(workerId int, s *Stage) {
 		n := rand.Intn(10)
 		for d := 0; d <= n; d++ {
@@ -61,9 +74,9 @@ func IngestData(s *Stage) {
 		atomic.AddUint64(s.doneWorkers, 1)
 	}
 
-	for w := 1; w <= s.noOfWorkers; w++ {
-		s.wg.Add(1)
-		go worker(w, s)
+	for w := 1; w <= cur.noOfWorkers; w++ {
+		cur.wg.Add(1)
+		go worker(w, cur)
 	}
 
 }

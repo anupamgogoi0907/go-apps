@@ -19,6 +19,9 @@ type Stage struct {
 }
 
 func main() {
+	InitPipeline()
+}
+func InitPipeline() {
 	wg := sync.WaitGroup{}
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)

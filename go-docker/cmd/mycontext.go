@@ -9,13 +9,13 @@ import (
 )
 
 type Stage struct {
-	noOfWorkers     int
-	noOfDoneWorkers *uint64
-	ctx             context.Context
-	cancelFunc      context.CancelFunc
-	wg              *sync.WaitGroup
-	data            chan int
-	error           chan string
+	noOfWorkers int
+	doneWorkers *uint64
+	ctx         context.Context
+	cancelFunc  context.CancelFunc
+	wg          *sync.WaitGroup
+	data        chan int
+	error       chan string
 }
 
 func main() {
@@ -25,19 +25,21 @@ func main() {
 
 	var n uint64
 	s := &Stage{
-		noOfWorkers:     2,
-		noOfDoneWorkers: &n,
-		ctx:             ctx,
-		cancelFunc:      cancel,
-		wg:              &wg,
-		data:            make(chan int),
+		noOfWorkers: 2,
+		doneWorkers: &n,
+		ctx:         ctx,
+		cancelFunc:  cancel,
+		wg:          &wg,
 	}
 	IngestData(s)
-	p1(s)
+	s1(s)
 	wg.Wait()
 }
 
 func IngestData(s *Stage) {
+	// Initialize the channel to send data.
+	s.data = make(chan int)
+
 	worker := func(workerId int, s *Stage) {
 		n := rand.Intn(10)
 		for d := 0; d <= n; d++ {
@@ -45,7 +47,7 @@ func IngestData(s *Stage) {
 			s.data <- d
 		}
 		s.wg.Done()
-		atomic.AddUint64(s.noOfDoneWorkers, 1)
+		atomic.AddUint64(s.doneWorkers, 1)
 	}
 
 	for w := 1; w <= s.noOfWorkers; w++ {
@@ -55,18 +57,18 @@ func IngestData(s *Stage) {
 
 }
 
-func p1(s *Stage) {
+func s1(s *Stage) {
 	worker := func(workerId int, s *Stage) {
 		flag := true
 		for flag {
 			select {
 			case d := <-s.data:
-				fmt.Printf("<<< Stage:%s, Worker:%d, Data:%d\n", "p1", workerId, d)
+				fmt.Printf("<<< Stage:%s, Worker:%d, Data:%d\n", "s1", workerId, d)
 			default:
-				c := atomic.LoadUint64(s.noOfDoneWorkers)
+				c := atomic.LoadUint64(s.doneWorkers)
 				if int(c) == s.noOfWorkers {
 					flag = false
-					fmt.Println("<<< Received all P1")
+					fmt.Println("<<< Received all in stage P1. Stopping P1.")
 					s.wg.Done()
 				}
 			}
@@ -74,4 +76,8 @@ func p1(s *Stage) {
 	}
 	s.wg.Add(1)
 	go worker(1, s)
+}
+
+func s2(s *Stage) {
+
 }

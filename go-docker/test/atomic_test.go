@@ -52,9 +52,7 @@ func p2(ch chan int, doneWorkers_p1 *uint64, wg *sync.WaitGroup) {
 					flag = false
 				}
 			}
-
 		}
 	}
-
 	go worker(doneWorkers_p1, wg)
 }

@@ -39,8 +39,9 @@ func main() {
 
 func IngestData(s *Stage) {
 	worker := func(workerId int, s *Stage) {
-		for d := 0; d < rand.Intn(10); d++ {
-			fmt.Printf(">>> Stage:%s, Worker:%d, Data:%d\n", "IngestData", workerId, d)
+		n := rand.Intn(10)
+		for d := 0; d <= n; d++ {
+			fmt.Printf(">>> Stage:%s, Worker:%d, Data:%d/%d\n", "IngestData", workerId, d, n)
 			s.data <- d
 		}
 		s.wg.Done()

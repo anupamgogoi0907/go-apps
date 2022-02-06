@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"sync"
 	"sync/atomic"
 )
@@ -11,6 +12,8 @@ func main() {
 }
 
 var (
+	error = make(chan string)
+
 	b1_noWorkers   int = 2
 	b1_doneWorkers uint64
 	b1_data        = make(chan int)
@@ -30,7 +33,13 @@ func b1(wg *sync.WaitGroup) {
 
 	worker := func(workerId int, wg *sync.WaitGroup) {
 		defer wg.Done()
-		for d := 0; d <= 5; d++ {
+		for d := 1; d <= 5; d++ {
+			n := rand.Intn(10)
+			if d == n {
+				e := "Some error"
+				fmt.Printf(">>> B1, Worker:%d, Sent:%s\n", workerId, e)
+				error <- e
+			}
 			fmt.Printf(">>> B1, Worker:%d, Sent:%d\n", workerId, d)
 			b1_data <- d
 		}
@@ -42,7 +51,6 @@ func b1(wg *sync.WaitGroup) {
 		wg.Add(1)
 		go worker(w, wg)
 	}
-
 }
 
 func b2(wg *sync.WaitGroup) {
@@ -53,6 +61,8 @@ func b2(wg *sync.WaitGroup) {
 			select {
 			case d := <-b1_data:
 				fmt.Printf(">>> B2, Worker:%d, Received:%d\n", workerId, d)
+			case e := <-error:
+				fmt.Printf(">>> B2, Worker:%d, Received:%s\n", workerId, e)
 			default:
 				c := atomic.LoadUint64(&b1_doneWorkers)
 				if int(c) == b1_noWorkers {

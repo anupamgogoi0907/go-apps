@@ -12,16 +12,22 @@ func main() {
 func InitComplexContext() {
 	wg := sync.WaitGroup{}
 	ctxRoot := context.Background()
-	ctxCancel, cancel := context.WithCancel(ctxRoot)
 
 	data := make(chan int)
-	a1(data, cancel, ctxCancel, &wg)
-	a2(data, cancel, ctxCancel, &wg)
+
+	// Stage 1
+	ctxCancelStage1, cancel := context.WithCancel(ctxRoot)
+	a1(data, cancel, ctxCancelStage1, &wg)
+
+	// Stage 2
+	ctxCancelStage2, _ := context.WithCancel(ctxCancelStage1)
+	a2(data, ctxCancelStage2, &wg)
+
 	wg.Wait()
 }
 
 func a1(data chan int, cancel context.CancelFunc, ctxCancel context.Context, wg *sync.WaitGroup) {
-	worker := func(workerId int, data chan int, ctxCancel context.Context, wg *sync.WaitGroup) {
+	worker := func(workerId int, data chan int, cancel context.CancelFunc, ctxCancel context.Context, wg *sync.WaitGroup) {
 		defer wg.Done()
 		flag := true
 
@@ -33,16 +39,18 @@ func a1(data chan int, cancel context.CancelFunc, ctxCancel context.Context, wg 
 				cancel()
 			} else {
 				d = d + 1
-				fmt.Printf(">>> B1, Worker:%d, Received:%d\n", workerId, d)
+				fmt.Printf(">>> A1, Worker:%d, Sent:%d\n", workerId, d)
 				data <- d
 			}
 		}
 	}
 
+	// Invoke workers.
 	wg.Add(1)
-	go worker(1, data, ctxCancel, wg)
+	go worker(1, data, cancel, ctxCancel, wg)
 }
-func a2(data chan int, cancel context.CancelFunc, ctxCancel context.Context, wg *sync.WaitGroup) {
+
+func a2(data chan int, ctxCancel context.Context, wg *sync.WaitGroup) {
 	worker := func(workerId int, data chan int, ctxCancel context.Context, wg *sync.WaitGroup) {
 		defer wg.Done()
 
@@ -51,17 +59,16 @@ func a2(data chan int, cancel context.CancelFunc, ctxCancel context.Context, wg 
 		for flag {
 			select {
 			case <-ctxCancel.Done():
-				fmt.Println("B2 exited.")
+				fmt.Println("### A2 exited.")
 				flag = false
 			case d := <-data:
-				fmt.Printf("<<< B2, Worker:%d, Received:%d\n", workerId, d)
+				fmt.Printf("<<< A2, Worker:%d, Received:%d\n", workerId, d)
 			default:
 
 			}
 		}
 	}
 
-	wg.Add(2)
+	wg.Add(1)
 	go worker(1, data, ctxCancel, wg)
-	go worker(2, data, ctxCancel, wg)
 }

@@ -3,83 +3,65 @@ package main
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"sync"
-	"sync/atomic"
 )
 
-//func main() {
-//	Init()
-//}
-
-type ComplexStage struct {
-	ctx         context.Context
-	wg          *sync.WaitGroup
-	cancelFunc  context.CancelFunc
-	noOfWorkers int
+func main() {
+	InitComplexContext()
 }
-
-func Init() {
+func InitComplexContext() {
 	wg := sync.WaitGroup{}
-	ctx := context.Background()
-	ctx, cancel := context.WithCancel(ctx)
+	ctxRoot := context.Background()
+	ctxCancel, cancel := context.WithCancel(ctxRoot)
 
-	const numOfWorkers = 2
-	var doneCounters uint64
-
-	data := a1(numOfWorkers, &doneCounters, cancel, ctx, &wg)
-	a2(numOfWorkers, &doneCounters, data, cancel, ctx, &wg)
-	wg.Wait()
-
-}
-func a1(numOfWorkers int, doneCounters *uint64, cancel context.CancelFunc, ctx context.Context, wg *sync.WaitGroup) chan int {
 	data := make(chan int)
-	worker := func(workerId int, cancel context.CancelFunc, ctx context.Context, wg *sync.WaitGroup) {
-		for v := 0; v < 10; v++ {
-			if v/2 == 1 {
-				msg := "Error in Worker:" + strconv.Itoa(workerId) + " for value: " + strconv.Itoa(v)
-				fmt.Println(msg)
-				cancel()
-				wg.Done()
-				return
-			} else {
-				fmt.Printf(">>> Stage:%s, Worker:%d, Data:%d\n", "a1", workerId, v)
-				data <- v
-			}
-		}
-		wg.Done()
-		atomic.AddUint64(doneCounters, 1)
-	}
-
-	for w := 1; w <= numOfWorkers; w++ {
-		wg.Add(1)
-		go worker(w, cancel, ctx, wg)
-	}
-	return data
+	a1(data, cancel, ctxCancel, &wg)
+	a2(data, cancel, ctxCancel, &wg)
+	wg.Wait()
 }
 
-func a2(numOfWorkers int, doneCounters *uint64, data chan int, cancel context.CancelFunc, ctx context.Context, wg *sync.WaitGroup) {
-	worker := func(numOfWorkers int, doneCounters *uint64, data chan int, cancel context.CancelFunc, ctx context.Context, wg *sync.WaitGroup) {
+func a1(data chan int, cancel context.CancelFunc, ctxCancel context.Context, wg *sync.WaitGroup) {
+	worker := func(workerId int, data chan int, ctxCancel context.Context, wg *sync.WaitGroup) {
+		defer wg.Done()
 		flag := true
+
+		// Data block.
+		d := 0
 		for flag {
-			c := atomic.LoadUint64(doneCounters)
-			select {
-			case <-ctx.Done():
-				fmt.Println("<<< Cancelled. Count", c)
+			if d == 5 {
 				flag = false
-				wg.Done()
-			case d := <-data:
-				fmt.Println("<<< Received:", d)
-			default:
-				if int(c) == numOfWorkers {
-					fmt.Printf("<<< Count%d\n", c)
-					flag = false
-				}
+				cancel()
+			} else {
+				d = d + 1
+				fmt.Printf(">>> B1, Worker:%d, Received:%d\n", workerId, d)
+				data <- d
 			}
 		}
-		wg.Done()
 	}
 
 	wg.Add(1)
-	go worker(numOfWorkers, doneCounters, data, cancel, ctx, wg)
+	go worker(1, data, ctxCancel, wg)
+}
+func a2(data chan int, cancel context.CancelFunc, ctxCancel context.Context, wg *sync.WaitGroup) {
+	worker := func(workerId int, data chan int, ctxCancel context.Context, wg *sync.WaitGroup) {
+		defer wg.Done()
+
+		// Data block.
+		flag := true
+		for flag {
+			select {
+			case <-ctxCancel.Done():
+				fmt.Println("B2 exited.")
+				flag = false
+			case d := <-data:
+				fmt.Printf("<<< B2, Worker:%d, Received:%d\n", workerId, d)
+			default:
+
+			}
+		}
+	}
+
+	wg.Add(2)
+	go worker(1, data, ctxCancel, wg)
+	go worker(2, data, ctxCancel, wg)
 }

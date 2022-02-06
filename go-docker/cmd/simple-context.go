@@ -6,9 +6,9 @@ import (
 	"sync"
 )
 
-func main() {
-	InitSimpleContext()
-}
+//func main() {
+//	InitSimpleContext()
+//}
 func InitSimpleContext() {
 	wg := sync.WaitGroup{}
 	ctxRoot := context.Background()

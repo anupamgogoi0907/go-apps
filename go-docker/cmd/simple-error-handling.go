@@ -30,7 +30,6 @@ func InitErrorHandling() {
 }
 
 func b1(wg *sync.WaitGroup) {
-
 	worker := func(workerId int, wg *sync.WaitGroup) {
 		defer wg.Done()
 		for d := 1; d <= 5; d++ {

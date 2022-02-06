@@ -7,9 +7,9 @@ import (
 	"sync/atomic"
 )
 
-//func main() {
-//	InitErrorHandling()
-//}
+func main() {
+	InitErrorHandling()
+}
 
 var (
 	error = make(chan string)
@@ -35,7 +35,7 @@ func b1(wg *sync.WaitGroup) {
 		for d := 1; d <= 5; d++ {
 			n := rand.Intn(10)
 			if d == n {
-				e := "Some error"
+				e := "#### Some error ####"
 				fmt.Printf(">>> B1, Worker:%d, Sent:%s\n", workerId, e)
 				error <- e
 			}

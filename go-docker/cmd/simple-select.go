@@ -9,9 +9,9 @@ var (
 	data = make(chan int)
 )
 
-func main() {
-	InitSimpleSelect()
-}
+//func main() {
+//	InitSimpleSelect()
+//}
 
 func InitSimpleSelect() {
 	wg := sync.WaitGroup{}

@@ -24,6 +24,8 @@ func b1(data chan int, cancel context.CancelFunc, ctxCancel context.Context, wg 
 	worker := func(workerId int, data chan int, ctxCancel context.Context, wg *sync.WaitGroup) {
 		defer wg.Done()
 		flag := true
+
+		// Data block.
 		d := 0
 		for flag {
 			if d == 5 {
@@ -43,6 +45,8 @@ func b1(data chan int, cancel context.CancelFunc, ctxCancel context.Context, wg 
 func b2(data chan int, cancel context.CancelFunc, ctxCancel context.Context, wg *sync.WaitGroup) {
 	worker := func(workerId int, data chan int, ctxCancel context.Context, wg *sync.WaitGroup) {
 		defer wg.Done()
+
+		// Data block.
 		flag := true
 		for flag {
 			select {

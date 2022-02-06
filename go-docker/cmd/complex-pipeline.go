@@ -19,9 +19,9 @@ type Stage struct {
 }
 
 //func main() {
-//	InitPipeline()
+//	InitComplexPipeline()
 //}
-func InitPipeline() {
+func InitComplexPipeline() {
 	wg := sync.WaitGroup{}
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)

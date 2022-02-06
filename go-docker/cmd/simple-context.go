@@ -21,7 +21,7 @@ func InitSimpleContext() {
 }
 
 func b1(data chan int, cancel context.CancelFunc, ctxCancel context.Context, wg *sync.WaitGroup) {
-	worker := func(data chan int, ctxCancel context.Context, wg *sync.WaitGroup) {
+	worker := func(workerId int, data chan int, ctxCancel context.Context, wg *sync.WaitGroup) {
 		defer wg.Done()
 		flag := true
 		d := 0
@@ -31,16 +31,17 @@ func b1(data chan int, cancel context.CancelFunc, ctxCancel context.Context, wg 
 				cancel()
 			} else {
 				d = d + 1
+				fmt.Printf(">>> B1, Worker:%d, Received:%d\n", workerId, d)
 				data <- d
 			}
 		}
 	}
 
 	wg.Add(1)
-	go worker(data, ctxCancel, wg)
+	go worker(1, data, ctxCancel, wg)
 }
 func b2(data chan int, cancel context.CancelFunc, ctxCancel context.Context, wg *sync.WaitGroup) {
-	worker := func(data chan int, ctxCancel context.Context, wg *sync.WaitGroup) {
+	worker := func(workerId int, data chan int, ctxCancel context.Context, wg *sync.WaitGroup) {
 		defer wg.Done()
 		flag := true
 		for flag {
@@ -49,13 +50,14 @@ func b2(data chan int, cancel context.CancelFunc, ctxCancel context.Context, wg 
 				fmt.Println("B2 exited.")
 				flag = false
 			case d := <-data:
-				fmt.Printf("<<< B2, Received:%d\n", d)
+				fmt.Printf("<<< B2, Worker:%d, Received:%d\n", workerId, d)
 			default:
 
 			}
 		}
 	}
 
-	wg.Add(1)
-	go worker(data, ctxCancel, wg)
+	wg.Add(2)
+	go worker(1, data, ctxCancel, wg)
+	go worker(2, data, ctxCancel, wg)
 }

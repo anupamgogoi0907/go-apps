@@ -25,7 +25,6 @@ func InitComplexContext() {
 
 	wg.Wait()
 }
-
 func a1(data chan int, cancel context.CancelFunc, ctxCancel context.Context, wg *sync.WaitGroup) {
 	worker := func(workerId int, data chan int, cancel context.CancelFunc, ctxCancel context.Context, wg *sync.WaitGroup) {
 		defer wg.Done()
@@ -49,7 +48,6 @@ func a1(data chan int, cancel context.CancelFunc, ctxCancel context.Context, wg 
 	wg.Add(1)
 	go worker(1, data, cancel, ctxCancel, wg)
 }
-
 func a2(data chan int, ctxCancel context.Context, wg *sync.WaitGroup) {
 	worker := func(workerId int, data chan int, ctxCancel context.Context, wg *sync.WaitGroup) {
 		defer wg.Done()

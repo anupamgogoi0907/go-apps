@@ -8,11 +8,11 @@ import (
 	"sync/atomic"
 )
 
-func main() {
-	Init()
-}
+//func main() {
+//	Init()
+//}
 
-type Stagex struct {
+type ComplexStage struct {
 	ctx         context.Context
 	wg          *sync.WaitGroup
 	cancelFunc  context.CancelFunc

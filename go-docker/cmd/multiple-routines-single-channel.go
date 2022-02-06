@@ -12,17 +12,20 @@ import (
 var result = make(chan string)
 
 //func main() {
-//	wg := sync.WaitGroup{}
-//	ctx := context.Background()
-//	ctx, cancel := context.WithCancel(ctx)
 //
-//	var doneWorkers_p1 uint64
-//	ch, err := processor1(&doneWorkers_p1, ctx, &wg)
-//	processor2(ch, err, &doneWorkers_p1, ctx, &wg)
-//
-//	wg.Wait()
-//	cancel()
 //}
+func InitMultipleRoutines() {
+	wg := sync.WaitGroup{}
+	ctx := context.Background()
+	ctx, cancel := context.WithCancel(ctx)
+
+	var doneWorkers_p1 uint64
+	ch, err := processor1(&doneWorkers_p1, ctx, &wg)
+	processor2(ch, err, &doneWorkers_p1, ctx, &wg)
+
+	wg.Wait()
+	cancel()
+}
 
 func processor1(doneWorkers_p1 *uint64, ctx context.Context, wg *sync.WaitGroup) (chan int, chan string) {
 	ch := make(chan int)

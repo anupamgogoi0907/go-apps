@@ -7,9 +7,9 @@ import (
 	"sync/atomic"
 )
 
-func main() {
-	InitErrorHandling()
-}
+//func main() {
+//	InitErrorHandling()
+//}
 
 var (
 	error = make(chan string)

@@ -23,7 +23,7 @@ func ReadLargeFile(path string) error {
 	// Pools for line
 	reader := bufio.NewReader(file)
 	linesPool := sync.Pool{New: func() interface{} {
-		lines := make([]byte, 500*1024)
+		lines := make([]byte, 50*1024)
 		return lines
 	}}
 
@@ -35,17 +35,22 @@ func ReadLargeFile(path string) error {
 
 	for flag {
 		buffer := linesPool.Get().([]byte)
-		numBytes, err := reader.Read(buffer)
+		nBytes, err := reader.Read(buffer)
 		if err != nil {
 			fmt.Println(err)
 			flag = false
 			break
 		}
 		nChunks = nChunks + 1
-		line := string(buffer[0:numBytes])
-		fmt.Println(line)
+		ProcessLine(&linesPool, buffer, nBytes)
 	}
 
 	fmt.Println("Total chunks:", nChunks)
 	return nil
+}
+
+func ProcessLine(linesPool *sync.Pool, buffer []byte, nBytes int) {
+	linesPool.Put(buffer)
+	line := buffer[0:nBytes]
+	fmt.Println(string(line))
 }

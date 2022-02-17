@@ -2,9 +2,13 @@ package test
 
 import (
 	"github.com/anupamgogoi0907/go-apps/data-processor/pkg/pipeline"
+	"log"
 	"testing"
 )
 
 func TestReadLargeFile(t *testing.T) {
-	pipeline.ReadLargeFile("/Users/agogoi/softwares/wso2/AM/wso2am-3.2.0/repository/logs/wso2carbon.log")
+	err := pipeline.ReadLargeFile("/Users/agogoi/Downloads/test.txt")
+	if err != nil {
+		log.Println(err)
+	}
 }

@@ -11,7 +11,7 @@ import (
 type DataReader struct {
 	Path      string
 	ChunkPool *sync.Pool
-	LinePool  *sync.Pool
+	TextPool  *sync.Pool
 	wg        *sync.WaitGroup
 }
 
@@ -20,15 +20,15 @@ func InitDataReader(path string) {
 		buffer := make([]byte, 10*1024)
 		return buffer
 	}}
-	linePool := sync.Pool{New: func() interface{} {
-		lines := ""
-		return lines
+	textPool := sync.Pool{New: func() interface{} {
+		text := ""
+		return text
 	}}
 
 	dataReader := &DataReader{
 		Path:      path,
 		ChunkPool: &chunkPool,
-		LinePool:  &linePool,
+		TextPool:  &textPool,
 		wg:        &sync.WaitGroup{},
 	}
 	ReadLargeFile(dataReader)
@@ -73,13 +73,15 @@ func ReadLargeFile(dataReader *DataReader) error {
 	return nil
 }
 
+// ProcessLine function is invoked for each chunk concurrently.
 func ProcessLine(dataReader *DataReader, chunk []byte, nBytes int, nChunks int) {
-	line := dataReader.LinePool.Get().(string)
-	line = string(chunk[0:nBytes])
-	fmt.Printf("########## Chunk: %d ########## \n%s\n", nChunks, line)
+	text := dataReader.TextPool.Get().(string)
+	text = string(chunk[0:nBytes])
 
-	// Put back chunk and line to the pools
+	fmt.Printf("########## Chunk: %d ########## \n%s\n", nChunks, text)
+
+	// Put back chunk and text to the pools
 	dataReader.ChunkPool.Put(chunk)
-	dataReader.LinePool.Put(line)
+	dataReader.TextPool.Put(text)
 	dataReader.wg.Done()
 }

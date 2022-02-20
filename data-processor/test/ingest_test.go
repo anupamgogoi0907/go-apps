@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/anupamgogoi0907/go-apps/data-processor/pkg/pipeline"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -21,12 +22,10 @@ func TestReadLineByLine(t *testing.T) {
 	nBytes, _ := reader.Read(bytes)
 	bytes = bytes[:nBytes]
 	text := string(bytes)
-	fmt.Println(text)
 
-	fmt.Println("########### 2 ###########")
-	nBytes, _ = reader.Read(bytes)
-	bytes = bytes[:nBytes]
-	text = string(bytes)
-	fmt.Println(text)
-
+	scanner := bufio.NewScanner(strings.NewReader(text))
+	scanner.Split(bufio.ScanLines)
+	for scanner.Scan() {
+		fmt.Println(scanner.Text())
+	}
 }

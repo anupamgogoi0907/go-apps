@@ -84,4 +84,5 @@ func ProcessLine(dataReader *DataReader, chunk []byte, nBytes int, nChunks int) 
 	dataReader.ChunkPool.Put(chunk)
 	dataReader.TextPool.Put(text)
 	dataReader.wg.Done()
+
 }

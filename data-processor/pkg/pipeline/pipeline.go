@@ -25,18 +25,18 @@ func (p *Pipeline) RunPipeline() error {
 	wg := &sync.WaitGroup{}
 
 	stageTwo := stage.NewStage("Stage2", func(curStage *stage.Stage) {
+		fmt.Println("Processing:", curStage.Name)
 		if curStage.Next != nil {
-			fmt.Println("Processing:", curStage.Name)
 			curStage.Next.Process(curStage.Next)
 		}
 	}, nil, wg)
 
 	stageOne := stage.NewStage("Stage1", func(curStage *stage.Stage) {
+		fmt.Println("Processing:", curStage.Name)
+		path := p.Input[0]
+		ingest := stage.NewIngest(string(path))
+		ingest.ReadLargeFile()
 		if curStage.Next != nil {
-			fmt.Println("Processing:", curStage.Name)
-			path := p.Input[0]
-			ingest := stage.NewIngest(string(path))
-			ingest.ReadLargeFile()
 			// Process Next stage.
 			curStage.Next.Process(curStage.Next)
 		}

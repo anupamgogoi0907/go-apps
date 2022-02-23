@@ -21,14 +21,12 @@ func NewStage(Id int, Name string, Process func(stage *Stage), Next *Stage) *Sta
 
 // StageData contains data regarding the input provided to the stages.
 type StageData struct {
-	FilePath interface{}
-	KeyWord  interface{}
+	Input []interface{}
 }
 
-func NewStageData(FilePath interface{}, KeyWord interface{}) *StageData {
+func NewStageData(Input ...interface{}) *StageData {
 	stageData := StageData{
-		FilePath: FilePath,
-		KeyWord:  KeyWord,
+		Input: Input,
 	}
 	return &stageData
 }

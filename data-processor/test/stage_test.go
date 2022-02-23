@@ -17,5 +17,5 @@ func TestStage(t *testing.T) {
 }
 func TestStageData(t *testing.T) {
 	stageData := model.NewStageData("demopath", "Hello World")
-	assert.Equal(t, "demopath", stageData.FilePath)
+	assert.Equal(t, "demopath", stageData.Input[0])
 }

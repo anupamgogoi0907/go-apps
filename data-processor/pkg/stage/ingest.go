@@ -8,14 +8,14 @@ import (
 	"sync"
 )
 
-type DataReader struct {
+type Ingest struct {
 	Path      string
 	ChunkPool *sync.Pool
 	TextPool  *sync.Pool
 	WG        *sync.WaitGroup
 }
 
-func NewDataReader(path string) *DataReader {
+func NewIngest(path string) *Ingest {
 	chunkPool := sync.Pool{New: func() interface{} {
 		buffer := make([]byte, 10*1024)
 		return buffer
@@ -25,7 +25,7 @@ func NewDataReader(path string) *DataReader {
 		return text
 	}}
 
-	dataReader := &DataReader{
+	dataReader := &Ingest{
 		Path:      path,
 		ChunkPool: &chunkPool,
 		TextPool:  &textPool,
@@ -34,14 +34,14 @@ func NewDataReader(path string) *DataReader {
 	return dataReader
 }
 
-func (dataReader *DataReader) ReadLargeFile() error {
+func (in *Ingest) ReadLargeFile() error {
 	// Check for entered file path.
-	if dataReader.Path == "" {
+	if in.Path == "" {
 		return errors.New("no path found")
 	}
 
 	// Check if the file can be opened.
-	file, err := os.Open(dataReader.Path)
+	file, err := os.Open(in.Path)
 	if err != nil {
 		return err
 	}
@@ -56,7 +56,7 @@ func (dataReader *DataReader) ReadLargeFile() error {
 	flag := true
 
 	for flag {
-		chunk := dataReader.ChunkPool.Get().([]byte)
+		chunk := in.ChunkPool.Get().([]byte)
 		nBytes, err := reader.Read(chunk)
 		if err != nil {
 			fmt.Println(err)
@@ -65,25 +65,25 @@ func (dataReader *DataReader) ReadLargeFile() error {
 		}
 		nChunks = nChunks + 1
 
-		dataReader.WG.Add(1)
-		go dataReader.ProcessLine(chunk, nBytes, nChunks)
+		in.WG.Add(1)
+		go in.processLine(chunk, nBytes, nChunks)
 	}
-	dataReader.WG.Wait()
+	in.WG.Wait()
 
 	fmt.Println("Total chunks:", nChunks)
 	return nil
 }
 
-// ProcessLine function is invoked for each chunk concurrently.
-func (dataReader *DataReader) ProcessLine(chunk []byte, nBytes int, nChunks int) {
-	text := dataReader.TextPool.Get().(string)
+// processLine function is invoked for each chunk concurrently.
+func (in *Ingest) processLine(chunk []byte, nBytes int, nChunks int) {
+	text := in.TextPool.Get().(string)
 	text = string(chunk[0:nBytes])
 
 	fmt.Printf("########## Chunk: %d ########## \n%s\n", nChunks, text)
 
 	// Put back chunk and text to the pools
-	dataReader.ChunkPool.Put(chunk)
-	dataReader.TextPool.Put(text)
-	dataReader.WG.Done()
+	in.ChunkPool.Put(chunk)
+	in.TextPool.Put(text)
+	in.WG.Done()
 
 }

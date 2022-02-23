@@ -10,7 +10,7 @@ import (
 )
 
 func TestReadLargeFile(t *testing.T) {
-	d := stage.NewDataReader("/Users/agogoi/softwares/wso2/AM/wso2am-3.2.0/repository/logs/wso2carbon.log")
+	d := stage.NewIngest("/Users/agogoi/softwares/wso2/AM/wso2am-3.2.0/repository/logs/wso2carbon.log")
 	d.ReadLargeFile()
 }
 

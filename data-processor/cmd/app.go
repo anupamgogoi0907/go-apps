@@ -7,7 +7,7 @@ import (
 
 func main() {
 	args := os.Args[1:]
-	p, err := pipeline.NewPipeline(args)
+	p, err := pipeline.NewPipeline(args...)
 	if err != nil {
 		p.RunPipeline()
 	}

@@ -8,10 +8,10 @@ import (
 )
 
 type Pipeline struct {
-	Input []interface{}
+	Input []string
 }
 
-func NewPipeline(Input ...interface{}) (*Pipeline, error) {
+func NewPipeline(Input ...string) (*Pipeline, error) {
 	if Input == nil || len(Input) == 0 || len(Input) == 1 {
 		return nil, errors.New("no pipeline data provided")
 	}
@@ -34,6 +34,10 @@ func (p *Pipeline) RunPipeline() error {
 	stageOne := stage.NewStage("Stage1", func(curStage *stage.Stage) {
 		if curStage.Next != nil {
 			fmt.Println("Processing:", curStage.Name)
+			path := p.Input[0]
+			ingest := stage.NewIngest(string(path))
+			ingest.ReadLargeFile()
+			// Process Next stage.
 			curStage.Next.Process(curStage.Next)
 		}
 	}, stageTwo, wg)

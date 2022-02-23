@@ -3,7 +3,7 @@ package pipeline
 import (
 	"errors"
 	"fmt"
-	"github.com/anupamgogoi0907/go-apps/data-processor/pkg/model"
+	"github.com/anupamgogoi0907/go-apps/data-processor/pkg/stage"
 	"sync"
 )
 
@@ -24,14 +24,14 @@ func NewPipeline(Input ...interface{}) (*Pipeline, error) {
 func (p *Pipeline) RunPipeline() error {
 	wg := &sync.WaitGroup{}
 
-	stageTwo := model.NewStage("Stage2", func(curStage *model.Stage) {
+	stageTwo := stage.NewStage("Stage2", func(curStage *stage.Stage) {
 		if curStage.Next != nil {
 			fmt.Println("Processing:", curStage.Name)
 			curStage.Next.Process(curStage.Next)
 		}
 	}, nil, wg)
 
-	stageOne := model.NewStage("Stage1", func(curStage *model.Stage) {
+	stageOne := stage.NewStage("Stage1", func(curStage *stage.Stage) {
 		if curStage.Next != nil {
 			fmt.Println("Processing:", curStage.Name)
 			curStage.Next.Process(curStage.Next)

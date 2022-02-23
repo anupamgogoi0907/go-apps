@@ -3,14 +3,15 @@ package test
 import (
 	"bufio"
 	"fmt"
-	"github.com/anupamgogoi0907/go-apps/data-processor/pkg/pipeline"
+	"github.com/anupamgogoi0907/go-apps/data-processor/pkg/stage"
 	"os"
 	"strings"
 	"testing"
 )
 
 func TestReadLargeFile(t *testing.T) {
-	pipeline.InitDataReader("/Users/agogoi/softwares/wso2/AM/wso2am-3.1.0/repository/logs/wso2carbon.log")
+	d := stage.NewDataReader("/Users/agogoi/softwares/wso2/AM/wso2am-3.2.0/repository/logs/wso2carbon.log")
+	d.ReadLargeFile()
 }
 
 func TestReadLineByLine(t *testing.T) {

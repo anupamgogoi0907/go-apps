@@ -1,4 +1,4 @@
-package model
+package stage
 
 import "sync"
 
@@ -21,16 +21,4 @@ func NewStage(Name string, Process func(stage *Stage), Next *Stage, WG *sync.Wai
 		WG:      WG,
 	}
 	return &stage
-}
-
-// StageData contains data regarding the input provided to the stages.
-type StageData struct {
-	Input []interface{}
-}
-
-func NewStageData(Input ...interface{}) *StageData {
-	stageData := StageData{
-		Input: Input,
-	}
-	return &stageData
 }

@@ -1,18 +1,40 @@
-package pipeline
+package stage
 
 import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/anupamgogoi0907/go-apps/data-processor/pkg/model"
 	"os"
+	"sync"
 )
 
-func InitDataReader(path string) {
-	dataReader := model.NewDataReader(path)
-	readLargeFile(dataReader)
+type DataReader struct {
+	Path      string
+	ChunkPool *sync.Pool
+	TextPool  *sync.Pool
+	WG        *sync.WaitGroup
 }
-func readLargeFile(dataReader *model.DataReader) error {
+
+func NewDataReader(path string) *DataReader {
+	chunkPool := sync.Pool{New: func() interface{} {
+		buffer := make([]byte, 10*1024)
+		return buffer
+	}}
+	textPool := sync.Pool{New: func() interface{} {
+		text := ""
+		return text
+	}}
+
+	dataReader := &DataReader{
+		Path:      path,
+		ChunkPool: &chunkPool,
+		TextPool:  &textPool,
+		WG:        &sync.WaitGroup{},
+	}
+	return dataReader
+}
+
+func (dataReader *DataReader) ReadLargeFile() error {
 	// Check for entered file path.
 	if dataReader.Path == "" {
 		return errors.New("no path found")
@@ -44,7 +66,7 @@ func readLargeFile(dataReader *model.DataReader) error {
 		nChunks = nChunks + 1
 
 		dataReader.WG.Add(1)
-		go ProcessLine(dataReader, chunk, nBytes, nChunks)
+		go dataReader.ProcessLine(chunk, nBytes, nChunks)
 	}
 	dataReader.WG.Wait()
 
@@ -53,7 +75,7 @@ func readLargeFile(dataReader *model.DataReader) error {
 }
 
 // ProcessLine function is invoked for each chunk concurrently.
-func ProcessLine(dataReader *model.DataReader, chunk []byte, nBytes int, nChunks int) {
+func (dataReader *DataReader) ProcessLine(chunk []byte, nBytes int, nChunks int) {
 	text := dataReader.TextPool.Get().(string)
 	text = string(chunk[0:nBytes])
 

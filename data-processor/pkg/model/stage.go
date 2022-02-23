@@ -1,8 +1,10 @@
 package model
 
+type ProcessData func(stage *Stage)
+
 type Stage struct {
 	Id      int
 	Name    string
-	Process func(self *Stage)
+	Process ProcessData
 	Next    *Stage
 }

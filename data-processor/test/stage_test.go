@@ -7,22 +7,25 @@ import (
 )
 
 func TestStage(t *testing.T) {
-	next := model.Stage{
+	stage2 := model.Stage{
 		Id:   2,
 		Name: "Read File",
 		Process: func(stage *model.Stage) {
-			fmt.Println("My stage id is:", stage.Id)
+			fmt.Println("My stage1 id is:", stage.Id)
 		},
 		Next: nil,
 	}
-	cur := model.Stage{
+	stage1 := model.Stage{
 		Id:   1,
 		Name: "Read File",
-		Next: &next,
+		Process: func(stage *model.Stage) {
+			fmt.Println("My stage1 id is:", stage.Id)
+		},
+		Next: &stage2,
 	}
 
-	fmt.Printf("Cur:%v, Next:%p\n", cur, &next)
+	fmt.Printf("Cur:%v, Next:%p\n", stage1, &stage2)
 
-	cur.Next.Id = 1000
-	next.Process(&next)
+	stage1.Next.Id = 1000
+	stage2.Process(&stage2)
 }

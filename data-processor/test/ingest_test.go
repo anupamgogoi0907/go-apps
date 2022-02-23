@@ -14,9 +14,9 @@ func TestReadLargeFile(t *testing.T) {
 }
 
 func TestReadLineByLine(t *testing.T) {
-	file, _ := os.Open("/Users/agogoi/softwares/wso2/AM/wso2am-3.1.0/repository/logs/wso2carbon.log")
+	file, _ := os.Open("/Users/agogoi/softwares/wso2/AM/wso2am-3.2.0/repository/logs/wso2carbon.log")
 	reader := bufio.NewReader(file)
-	bytes := make([]byte, 1*1024)
+	bytes := make([]byte, 50*1024)
 
 	fmt.Println("########### 1 ###########")
 	nBytes, _ := reader.Read(bytes)
@@ -26,6 +26,9 @@ func TestReadLineByLine(t *testing.T) {
 	scanner := bufio.NewScanner(strings.NewReader(text))
 	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
-		fmt.Println(scanner.Text())
+		line := scanner.Text()
+		if strings.Contains(line, "2022-02-21 16:07:52") {
+			fmt.Println(line)
+		}
 	}
 }

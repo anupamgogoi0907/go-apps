@@ -1,13 +1,13 @@
 package model
 
-// Stage data structure
-type ProcessData func(stage *Stage)
+// Stage is the actual representation of each stage
 type Stage struct {
 	Id      int
 	Name    string
 	Process ProcessData
 	Next    *Stage
 }
+type ProcessData func(stage *Stage)
 
 func NewStage(Id int, Name string, Process func(stage *Stage), Next *Stage) *Stage {
 	stage := Stage{
@@ -19,7 +19,7 @@ func NewStage(Id int, Name string, Process func(stage *Stage), Next *Stage) *Sta
 	return &stage
 }
 
-// StageData
+// StageData contains data regarding the input provided to the stages.
 type StageData struct {
 	FilePath interface{}
 	KeyWord  interface{}

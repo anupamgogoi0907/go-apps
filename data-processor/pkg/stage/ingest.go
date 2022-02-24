@@ -4,12 +4,14 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"sync"
 )
 
 var (
-	chunkSize = 10 * 1024
+	chunkSize = 2
+	chunk     = make([]byte, chunkSize)
 )
 
 type Ingest struct {
@@ -17,12 +19,13 @@ type Ingest struct {
 	ChunkPool *sync.Pool
 	TextPool  *sync.Pool
 	WG        *sync.WaitGroup
+	Finished  bool
 }
 
 func NewIngest(path string) *Ingest {
 	chunkPool := sync.Pool{New: func() interface{} {
-		buffer := make([]byte, 10*1024)
-		return buffer
+		chunk := chunk
+		return chunk
 	}}
 	textPool := sync.Pool{New: func() interface{} {
 		text := ""
@@ -37,9 +40,10 @@ func NewIngest(path string) *Ingest {
 	}
 	return dataReader
 }
-func (in *Ingest) ReadLargeFileConcurrently() error {
+func (in *Ingest) ReadFileConcurrently() error {
 	// Check if the file can be opened.
 	file, err := os.Open(in.Path)
+	defer file.Close()
 	if err != nil {
 		return err
 	}
@@ -53,14 +57,40 @@ func (in *Ingest) ReadLargeFileConcurrently() error {
 	if r := fileSize % chunkSize; r != 0 {
 		count++
 	}
+	fmt.Println("Total workers:", count)
+	// Reader.
+	offset := int64(0)
+	reader := bufio.NewReader(file)
+
+	// Spawn count number of goroutines.
 	for i := 1; i <= count; i++ {
 		in.WG.Add(1)
+		go in.ReadFileConcurrentlyRoutine(i, offset, file, reader)
+		offset = offset + int64(chunkSize)
 	}
 	in.WG.Wait()
-
 	return nil
 }
-func (in *Ingest) ReadLargeFile() error {
+func (in *Ingest) ReadFileConcurrentlyRoutine(workerId int, offset int64, file *os.File, reader *bufio.Reader) error {
+	file.Seek(offset, 0)
+	chunk := in.ChunkPool.Get().([]byte)
+	nBytes, err := reader.Read(chunk)
+
+	if err != nil && err == io.EOF {
+		in.Finished = true
+	} else {
+		text := in.TextPool.Get().(string)
+		text = string(chunk[0:nBytes])
+		fmt.Printf("########## Worker:%d ##########\n%s\n", workerId, text)
+		in.TextPool.Put(text)
+	}
+
+	in.ChunkPool.Put(chunk)
+	in.WG.Done()
+	return nil
+}
+
+func (in *Ingest) ReadFile() error {
 	// Check for entered file path.
 	if in.Path == "" {
 		return errors.New("no path found")

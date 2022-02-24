@@ -11,13 +11,19 @@ import (
 )
 
 var (
-	filePath = "/Users/agogoi/softwares/wso2/AM/wso2am-3.2.0/repository/logs/wso2carbon.log"
-	chunk    = make([]byte, 1024)
+	filePath  = "/Users/agogoi/softwares/wso2/AM/wso2am-3.2.0/repository/logs/wso2carbon.log"
+	chunkSize = 1024
+	chunk     = make([]byte, chunkSize)
 )
 
-func TestReadLargeFile(t *testing.T) {
+func TestReadFile(t *testing.T) {
 	d := stage.NewIngest(filePath)
-	d.ReadLargeFile()
+	d.ReadFile()
+}
+
+func TestReadFileConcurrently(t *testing.T) {
+	d := stage.NewIngest("demo.log")
+	d.ReadFileConcurrently()
 }
 
 func TestReadLineByLine(t *testing.T) {
@@ -41,6 +47,7 @@ func TestReadLineByLine(t *testing.T) {
 }
 
 func TestFileOffset(t *testing.T) {
+	limit := 1
 	cur := 0
 	file, _ := os.Open("demo.log")
 	reader := bufio.NewReader(file)
@@ -53,10 +60,18 @@ func TestFileOffset(t *testing.T) {
 	assert.Equal(t, "abcde", data)
 
 	// Second read.
-	cur = cur + 1
+	cur = cur + limit
 	file.Seek(int64(cur), 0)
 	nBytes, _ = reader.Read(chunk)
 	chunk = chunk[0:nBytes]
 	data = string(chunk)
 	assert.Equal(t, "bcde", data)
+
+	// Third read.
+	cur = cur + limit
+	file.Seek(int64(cur), 0)
+	nBytes, _ = reader.Read(chunk)
+	chunk = chunk[0:nBytes]
+	data = string(chunk)
+	assert.Equal(t, "cde", data)
 }

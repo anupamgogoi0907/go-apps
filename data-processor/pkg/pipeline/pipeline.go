@@ -36,7 +36,7 @@ func (p *Pipeline) RunPipeline() error {
 		fmt.Println("Processing:", curStage.Name)
 		path := p.Input[0]
 		ingest := stage.NewIngest(string(path))
-		ingest.ReadLargeFile()
+		ingest.ReadFile()
 		if curStage.Next != nil {
 			curStage.Next.Process(curStage.Next)
 		}

@@ -17,8 +17,13 @@ var (
 )
 
 func TestReadFileConcurrently(t *testing.T) {
-	d := stage.NewIngest("demo.log", make(chan string))
-	d.ReadFileConcurrently()
+	data := make(chan string)
+	//go func() {
+	//	time.Sleep(time.Second)
+	//	fmt.Println(<-data)
+	//}()
+	in := stage.NewIngest("demo.log", data)
+	in.ReadFileConcurrently()
 }
 
 func TestReadLineByLine(t *testing.T) {

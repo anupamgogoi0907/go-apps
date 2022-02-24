@@ -19,7 +19,7 @@ type Ingest struct {
 	TextPool  *sync.Pool
 	WG        *sync.WaitGroup
 	Finished  bool
-	data      chan string
+	Data      chan string
 }
 
 func NewIngest(path string, data chan string) *Ingest {
@@ -38,14 +38,14 @@ func NewIngest(path string, data chan string) *Ingest {
 		TextPool:  &textPool,
 		WG:        &sync.WaitGroup{},
 		Finished:  false,
-		data:      data,
+		Data:      data,
 	}
 	return dataReader
 }
 func (in *Ingest) ReadFileConcurrently() error {
 	offset := int64(0)
 
-	// Spawn count number of goroutines.
+	// Spawn workers number of goroutines.
 	for i := 1; i <= workers; i++ {
 		in.WG.Add(1)
 		go in.ReadFileConcurrentlyRoutine(i, offset)
@@ -72,7 +72,7 @@ func (in *Ingest) ReadFileConcurrentlyRoutine(workerId int, offset int64) error 
 	} else {
 		text = string(chunk[0:nBytes])
 		fmt.Printf("########## Worker:%d, Offset:%d ##########\n%s\n", workerId, offset, text)
-		in.TextPool.Put(text)
+		//in.Data <- text
 	}
 
 	// Put chunk and text back to the respective pools.

@@ -8,6 +8,10 @@ import (
 	"sync"
 )
 
+var (
+	chunkSize = 10 * 1024
+)
+
 type Ingest struct {
 	Path      string
 	ChunkPool *sync.Pool
@@ -33,7 +37,29 @@ func NewIngest(path string) *Ingest {
 	}
 	return dataReader
 }
+func (in *Ingest) ReadLargeFileConcurrently() error {
+	// Check if the file can be opened.
+	file, err := os.Open(in.Path)
+	if err != nil {
+		return err
+	}
 
+	// Check file size.
+	fi, _ := file.Stat()
+	fileSize := int(fi.Size())
+
+	// Count number of necessary workers.
+	count := fileSize / chunkSize
+	if r := fileSize % chunkSize; r != 0 {
+		count++
+	}
+	for i := 1; i <= count; i++ {
+		in.WG.Add(1)
+	}
+	in.WG.Wait()
+
+	return nil
+}
 func (in *Ingest) ReadLargeFile() error {
 	// Check for entered file path.
 	if in.Path == "" {

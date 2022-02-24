@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"sync"
 )
@@ -72,21 +71,23 @@ func (in *Ingest) ReadFileConcurrently() error {
 	return nil
 }
 func (in *Ingest) ReadFileConcurrentlyRoutine(workerId int, offset int64, file *os.File, reader *bufio.Reader) error {
-	file.Seek(offset, 0)
-	chunk := in.ChunkPool.Get().([]byte)
-	nBytes, err := reader.Read(chunk)
+	if in.Finished == false {
+		file.Seek(offset, 0)
+		chunk := in.ChunkPool.Get().([]byte)
+		nBytes, err := reader.Read(chunk)
 
-	if err != nil && err == io.EOF {
-		in.Finished = true
-	} else {
-		text := in.TextPool.Get().(string)
-		text = string(chunk[0:nBytes])
-		fmt.Printf("########## Worker:%d ##########\n%s\n", workerId, text)
-		in.TextPool.Put(text)
+		if err != nil {
+			in.Finished = true
+		} else {
+			text := in.TextPool.Get().(string)
+			text = string(chunk[0:nBytes])
+			fmt.Printf("########## Worker:%d ##########\n%s\n", workerId, text)
+			in.TextPool.Put(text)
+		}
+
+		in.ChunkPool.Put(chunk)
+		in.WG.Done()
 	}
-
-	in.ChunkPool.Put(chunk)
-	in.WG.Done()
 	return nil
 }
 

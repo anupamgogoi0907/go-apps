@@ -70,7 +70,6 @@ func (in *Ingest) ReadFileConcurrentlyRoutine(workerId int, offset int64) error 
 	if err != nil {
 		fmt.Printf("########## Worker:%d, Offset:%d ##########\n%s\n", workerId, offset, string(err.Error()))
 	} else {
-
 		text = string(chunk[0:nBytes])
 		fmt.Printf("########## Worker:%d, Offset:%d ##########\n%s\n", workerId, offset, text)
 		in.TextPool.Put(text)

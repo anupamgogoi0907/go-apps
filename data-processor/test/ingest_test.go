@@ -16,13 +16,8 @@ var (
 	chunk     = make([]byte, chunkSize)
 )
 
-func TestReadFile(t *testing.T) {
-	d := stage.NewIngest(filePath)
-	d.ReadFile()
-}
-
 func TestReadFileConcurrently(t *testing.T) {
-	d := stage.NewIngest("demo.log")
+	d := stage.NewIngest("demo.log", make(chan string))
 	d.ReadFileConcurrently()
 }
 

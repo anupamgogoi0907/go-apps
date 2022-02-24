@@ -4,12 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/anupamgogoi0907/go-apps/data-processor/pkg/stage"
-	"sync"
 )
 
 type Pipeline struct {
-	Input      []string
-	wgPipeline *sync.WaitGroup
+	Input []string
 }
 
 func NewPipeline(Input ...string) (*Pipeline, error) {
@@ -17,8 +15,7 @@ func NewPipeline(Input ...string) (*Pipeline, error) {
 		return nil, errors.New("no pipeline data provided")
 	}
 	pipeline := &Pipeline{
-		Input:      Input,
-		wgPipeline: &sync.WaitGroup{},
+		Input: Input,
 	}
 	return pipeline, nil
 }
@@ -30,20 +27,18 @@ func (p *Pipeline) RunPipeline() error {
 		if curStage.Next != nil {
 			curStage.Next.Process(curStage.Next)
 		}
-	}, nil, p.wgPipeline)
+	}, nil)
 
 	stageOne := stage.NewStage("Stage1", func(curStage *stage.Stage) {
 		fmt.Println("Processing:", curStage.Name)
 		path := p.Input[0]
-		ingest := stage.NewIngest(string(path))
-		ingest.ReadFile()
+		ingest := stage.NewIngest(path, curStage.Data)
+		ingest.ReadFileConcurrently()
 		if curStage.Next != nil {
 			curStage.Next.Process(curStage.Next)
 		}
-	}, stageTwo, p.wgPipeline)
+	}, stageTwo)
 
 	stageOne.Process(stageOne)
-	p.wgPipeline.Wait()
-
 	return nil
 }

@@ -8,7 +8,8 @@ import (
 )
 
 type Pipeline struct {
-	Input []string
+	Input      []string
+	wgPipeline *sync.WaitGroup
 }
 
 func NewPipeline(Input ...string) (*Pipeline, error) {
@@ -16,20 +17,20 @@ func NewPipeline(Input ...string) (*Pipeline, error) {
 		return nil, errors.New("no pipeline data provided")
 	}
 	pipeline := &Pipeline{
-		Input: Input,
+		Input:      Input,
+		wgPipeline: &sync.WaitGroup{},
 	}
 	return pipeline, nil
 }
 
 func (p *Pipeline) RunPipeline() error {
-	wg := &sync.WaitGroup{}
 
 	stageTwo := stage.NewStage("Stage2", func(curStage *stage.Stage) {
 		fmt.Println("Processing:", curStage.Name)
 		if curStage.Next != nil {
 			curStage.Next.Process(curStage.Next)
 		}
-	}, nil, wg)
+	}, nil, p.wgPipeline)
 
 	stageOne := stage.NewStage("Stage1", func(curStage *stage.Stage) {
 		fmt.Println("Processing:", curStage.Name)
@@ -37,13 +38,12 @@ func (p *Pipeline) RunPipeline() error {
 		ingest := stage.NewIngest(string(path))
 		ingest.ReadLargeFile()
 		if curStage.Next != nil {
-			// Process Next stage.
 			curStage.Next.Process(curStage.Next)
 		}
-	}, stageTwo, wg)
+	}, stageTwo, p.wgPipeline)
 
 	stageOne.Process(stageOne)
-	wg.Wait()
+	p.wgPipeline.Wait()
 
 	return nil
 }

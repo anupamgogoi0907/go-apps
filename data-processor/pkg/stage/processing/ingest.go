@@ -26,7 +26,7 @@ type Ingest struct {
 	CurStage  *stage.Stage
 }
 
-func NewStageProcessor(args ...string) *Ingest {
+func NewIngestProcessor(args ...string) *Ingest {
 	chunkPool := sync.Pool{New: func() interface{} {
 		chunk := chunk
 		return chunk

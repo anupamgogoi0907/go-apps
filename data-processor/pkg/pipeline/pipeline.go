@@ -29,7 +29,7 @@ func (p *Pipeline) RunPipeline() error {
 	s1.RunStage()
 
 	stageProcessor2 := processing.NewTransformProcessor("")
-	s2 := stage.NewStage("Transform", 20, uint64(0), wg, make(chan string), s1, stageProcessor2)
+	s2 := stage.NewStage("Transform", 5, uint64(0), wg, nil, s1, stageProcessor2)
 	s2.RunStage()
 
 	// Wait for all goroutines that belong to all stages to finish.

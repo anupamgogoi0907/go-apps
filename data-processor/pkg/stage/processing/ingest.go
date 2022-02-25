@@ -16,7 +16,7 @@ const (
 )
 
 var (
-	chunkSize = mb * 5
+	chunkSize = 2
 	chunk     = make([]byte, chunkSize)
 )
 

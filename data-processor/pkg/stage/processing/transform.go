@@ -3,6 +3,8 @@ package processing
 import (
 	"fmt"
 	"github.com/anupamgogoi0907/go-apps/data-processor/pkg/stage"
+	"os"
+	"strconv"
 	"sync/atomic"
 )
 
@@ -19,11 +21,17 @@ func (t *Transform) RunStageProcessor(curStage *stage.Stage) {
 
 	worker := func(workerId int, curState *stage.Stage) {
 		flag := true
+		var file *os.File
+		filePath := "/Users/agogoi/Downloads/" + strconv.Itoa(workerId) + ".log"
+
 		for flag {
 			select {
 			case text := <-curState.PrevStage.Data:
+				file, _ = os.Create(filePath)
+				defer file.Close()
 				fmt.Printf("<<<<<<<<<< Stage:%s, Worker:%d\n", t.CurStage.Name, workerId)
 				fmt.Println(text)
+				file.WriteString(text)
 			default:
 				c := atomic.LoadUint64(curStage.PrevStage.DoneWorkers)
 				if int(c) == curStage.PrevStage.NoOfWorkers {

@@ -92,3 +92,12 @@ func TestComposition(t *testing.T) {
 	}
 	assert.Equal(t, 100, in.CurStage.NoOfWorkers)
 }
+
+func TestAppendFile(t *testing.T) {
+	file, _ := os.Create("/Users/agogoi/Downloads/demo.log")
+
+	file.WriteString("Hello\n")
+	file.WriteString("World")
+	file.WriteString("World")
+	file.Close()
+}

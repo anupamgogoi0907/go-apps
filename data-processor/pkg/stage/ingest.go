@@ -18,8 +18,6 @@ type Ingest struct {
 	ChunkPool *sync.Pool
 	TextPool  *sync.Pool
 	WG        *sync.WaitGroup
-	Finished  bool
-	Data      chan string
 }
 
 func NewIngest(path string, data chan string) *Ingest {
@@ -37,8 +35,6 @@ func NewIngest(path string, data chan string) *Ingest {
 		ChunkPool: &chunkPool,
 		TextPool:  &textPool,
 		WG:        &sync.WaitGroup{},
-		Finished:  false,
-		Data:      data,
 	}
 	return dataReader
 }

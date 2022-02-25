@@ -6,6 +6,7 @@ import (
 	"github.com/anupamgogoi0907/go-apps/data-processor/pkg/stage"
 	"os"
 	"sync"
+	"sync/atomic"
 )
 
 const (
@@ -58,6 +59,7 @@ func (in *Ingest) readFile() error {
 		offset = offset + int64(chunkSize)
 	}
 	in.CurStage.WG.Wait()
+	fmt.Println("########### Finished Workers:", atomic.LoadUint64(in.CurStage.DoneWorkers))
 	return nil
 }
 func (in *Ingest) readFileRoutine(workerId int, offset int64) error {
@@ -78,7 +80,7 @@ func (in *Ingest) readFileRoutine(workerId int, offset int64) error {
 	} else {
 		text = string(chunk[0:nBytes])
 		fmt.Printf("########## Worker:%d, Offset:%d ##########\n%s\n", workerId, offset, text)
-		//in.Data <- text
+		//in.CurStage.Data <- text
 	}
 
 	// Put chunk and text back to the respective pools.
@@ -86,5 +88,6 @@ func (in *Ingest) readFileRoutine(workerId int, offset int64) error {
 	in.TextPool.Put(text)
 
 	in.CurStage.WG.Done()
+	atomic.AddUint64(in.CurStage.DoneWorkers, 1)
 	return nil
 }

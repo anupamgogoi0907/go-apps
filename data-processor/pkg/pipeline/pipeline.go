@@ -23,11 +23,11 @@ func NewPipeline(Input ...string) (*Pipeline, error) {
 
 func (p *Pipeline) RunPipeline() error {
 	stageProcessor1 := processing.NewIngestProcessor(p.Input[0])
-	s1 := stage.NewStage(2, uint64(0), &sync.WaitGroup{}, make(chan string), nil, stageProcessor1)
+	s1 := stage.NewStage("Ingest Data", 2, uint64(0), &sync.WaitGroup{}, make(chan string), nil, stageProcessor1)
 	s1.RunStage()
 
 	stageProcessor2 := processing.NewTransformProcessor("")
-	s2 := stage.NewStage(2, uint64(0), &sync.WaitGroup{}, make(chan string), s1, stageProcessor2)
+	s2 := stage.NewStage("Transform", 2, uint64(0), &sync.WaitGroup{}, make(chan string), s1, stageProcessor2)
 	s2.RunStage()
 
 	return nil

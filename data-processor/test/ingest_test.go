@@ -19,9 +19,9 @@ var (
 )
 
 func TestReadFileConcurrently(t *testing.T) {
-	in := processing.NewIngestProcessor(filePath)
-	stage := stage.NewStage(20, uint64(0), &sync.WaitGroup{}, make(chan string), nil, in)
-	in.RunStageProcessor(stage)
+	stageProcessor := processing.NewIngestProcessor(filePath)
+	stage := stage.NewStage("Ingest", 10, uint64(0), &sync.WaitGroup{}, make(chan string), nil, stageProcessor)
+	stage.RunStage()
 }
 
 func TestReadLineByLine(t *testing.T) {

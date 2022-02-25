@@ -13,22 +13,22 @@ type Stage struct {
 	WG             *sync.WaitGroup
 	Data           chan string
 	Error          chan string
-	Prev           *Stage
+	PrevStage      *Stage
 	StageProcessor IStageProcessor
 }
 
-func NewStage(NoOfWorkers int, DoneWorkers uint64, WG *sync.WaitGroup, Data chan string, Prev *Stage, StageProcessor IStageProcessor) *Stage {
+func NewStage(NoOfWorkers int, DoneWorkers uint64, WG *sync.WaitGroup, Data chan string, PrevStage *Stage, StageProcessor IStageProcessor) *Stage {
 	stage := &Stage{
 		NoOfWorkers:    NoOfWorkers,
 		DoneWorkers:    &DoneWorkers,
 		WG:             WG,
 		Data:           Data,
-		Prev:           Prev,
+		PrevStage:      PrevStage,
 		StageProcessor: StageProcessor,
 	}
 	return stage
 }
 
-func (cur *Stage) RunStage() {
-	cur.StageProcessor.RunStageProcessor(cur)
+func (CurStage *Stage) RunStage() {
+	CurStage.StageProcessor.RunStageProcessor(CurStage)
 }

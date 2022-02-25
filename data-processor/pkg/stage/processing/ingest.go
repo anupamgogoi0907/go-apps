@@ -1,8 +1,9 @@
-package stage
+package processing
 
 import (
 	"bufio"
 	"fmt"
+	"github.com/anupamgogoi0907/go-apps/data-processor/pkg/stage"
 	"os"
 	"sync"
 )
@@ -22,7 +23,7 @@ type Ingest struct {
 	Path      string
 	ChunkPool *sync.Pool
 	TextPool  *sync.Pool
-	Cur       *Stage
+	CurStage  *stage.Stage
 }
 
 func NewStageProcessor(args ...string) *Ingest {
@@ -43,23 +44,23 @@ func NewStageProcessor(args ...string) *Ingest {
 	return in
 }
 
-func (in *Ingest) RunStageProcessor(cur *Stage) {
-	in.Cur = cur
-	in.readFileConcurrently()
+func (in *Ingest) RunStageProcessor(CurStage *stage.Stage) {
+	in.CurStage = CurStage
+	in.readFile()
 }
-func (in *Ingest) readFileConcurrently() error {
+func (in *Ingest) readFile() error {
 	offset := int64(0)
 
 	// Spawn workers number of goroutines.
-	for i := 1; i <= in.Cur.NoOfWorkers; i++ {
-		in.Cur.WG.Add(1)
-		go in.readFileConcurrentlyRoutine(i, offset)
+	for i := 1; i <= in.CurStage.NoOfWorkers; i++ {
+		in.CurStage.WG.Add(1)
+		go in.readFileRoutine(i, offset)
 		offset = offset + int64(chunkSize)
 	}
-	in.Cur.WG.Wait()
+	in.CurStage.WG.Wait()
 	return nil
 }
-func (in *Ingest) readFileConcurrentlyRoutine(workerId int, offset int64) error {
+func (in *Ingest) readFileRoutine(workerId int, offset int64) error {
 	file, _ := os.Open(in.Path)
 	defer file.Close()
 	file.Seek(offset, 0)
@@ -84,6 +85,6 @@ func (in *Ingest) readFileConcurrentlyRoutine(workerId int, offset int64) error 
 	in.ChunkPool.Put(chunk)
 	in.TextPool.Put(text)
 
-	in.Cur.WG.Done()
+	in.CurStage.WG.Done()
 	return nil
 }

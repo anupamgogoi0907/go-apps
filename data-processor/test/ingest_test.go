@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/anupamgogoi0907/go-apps/data-processor/pkg/stage"
+	"github.com/anupamgogoi0907/go-apps/data-processor/pkg/stage/processing"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"strings"
@@ -18,7 +19,7 @@ var (
 )
 
 func TestReadFileConcurrently(t *testing.T) {
-	in := stage.NewStageProcessor(filePath)
+	in := processing.NewStageProcessor(filePath)
 	stage := stage.NewStage(20, uint64(0), &sync.WaitGroup{}, make(chan string), nil, in)
 	in.RunStageProcessor(stage)
 }
@@ -83,11 +84,11 @@ func TestComposition(t *testing.T) {
 		Data:        nil,
 		Error:       nil,
 	}
-	in := stage.Ingest{
+	in := processing.Ingest{
 		Path:      "",
 		ChunkPool: nil,
 		TextPool:  nil,
-		Cur:       s1,
+		CurStage:  s1,
 	}
-	assert.Equal(t, 100, in.Cur.NoOfWorkers)
+	assert.Equal(t, 100, in.CurStage.NoOfWorkers)
 }

@@ -2,7 +2,6 @@ package stage
 
 import (
 	"context"
-	"fmt"
 	"sync"
 )
 
@@ -33,6 +32,5 @@ func NewStage(Name string, NoOfWorkers int, DoneWorkers uint64, WG *sync.WaitGro
 }
 
 func (CurStage *Stage) RunStage() {
-	fmt.Printf("########### Stage:%s ###########\n", CurStage.Name)
 	CurStage.StageProcessor.RunStageProcessor(CurStage)
 }

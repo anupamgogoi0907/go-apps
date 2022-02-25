@@ -16,7 +16,7 @@ const (
 )
 
 var (
-	chunkSize = 10 * kb
+	chunkSize = 4
 	chunk     = make([]byte, chunkSize)
 )
 
@@ -58,8 +58,6 @@ func (in *Ingest) readFile() error {
 		go in.readFileRoutine(i, offset)
 		offset = offset + int64(chunkSize)
 	}
-	in.CurStage.WG.Wait()
-	fmt.Println("########### Finished Workers:", atomic.LoadUint64(in.CurStage.DoneWorkers))
 	return nil
 }
 func (in *Ingest) readFileRoutine(workerId int, offset int64) error {
@@ -76,11 +74,12 @@ func (in *Ingest) readFileRoutine(workerId int, offset int64) error {
 	nBytes, err := reader.Read(chunk)
 
 	if err != nil {
-		fmt.Printf("########## Worker:%d, Offset:%d ##########\n%s\n", workerId, offset, string(err.Error()))
+		fmt.Printf(">>>>>>>>>> Stage:%s, Worker:%d, Offset:%d\n", in.CurStage.Name, workerId, offset)
+		fmt.Println(err)
 	} else {
 		text = string(chunk[0:nBytes])
-		fmt.Printf("########## Worker:%d, Offset:%d ##########\n%s\n", workerId, offset, text)
-		//in.CurStage.Data <- text
+		fmt.Printf(">>>>>>>>>> Stage:%s, Worker:%d, Offset:%d\n", in.CurStage.Name, workerId, offset)
+		in.CurStage.Data <- text
 	}
 
 	// Put chunk and text back to the respective pools.

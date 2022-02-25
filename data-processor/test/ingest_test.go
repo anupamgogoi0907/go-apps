@@ -17,12 +17,11 @@ var (
 )
 
 func TestReadFileConcurrently(t *testing.T) {
-	data := make(chan string)
 	//go func() {
 	//	time.Sleep(time.Second)
 	//	fmt.Println(<-data)
 	//}()
-	in := stage.NewIngest("demo.log", data)
+	in := stage.NewIngest("demo.log")
 	in.ReadFileConcurrently()
 }
 
@@ -74,4 +73,23 @@ func TestFileOffset(t *testing.T) {
 	chunk = chunk[0:nBytes]
 	data = string(chunk)
 	assert.Equal(t, "cde", data)
+}
+
+func TestComposition(t *testing.T) {
+	s1 := &stage.Stage{
+		NoOfWorkers: 100,
+		DoneWorkers: nil,
+		Ctx:         nil,
+		CancelFunc:  nil,
+		WG:          nil,
+		Data:        nil,
+		Error:       nil,
+	}
+	in := stage.Ingest{
+		Path:      "",
+		ChunkPool: nil,
+		TextPool:  nil,
+		S:         s1,
+	}
+	assert.Equal(t, 100, in.S.NoOfWorkers)
 }

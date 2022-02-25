@@ -1,20 +1,36 @@
 package stage
 
-// Stage is the actual representation of each stage
-type Stage struct {
-	Name    string
-	Process ProcessData
-	Next    *Stage
-	Data    chan string
-}
-type ProcessData func(stage *Stage)
+import (
+	"context"
+	"sync"
+)
 
-func NewStage(Name string, Process func(stage *Stage), Next *Stage) *Stage {
-	stage := Stage{
-		Name:    Name,
-		Process: Process,
-		Next:    Next,
-		Data:    make(chan string),
+type Stage struct {
+	Name           string
+	NoOfWorkers    int
+	DoneWorkers    *uint64
+	Ctx            context.Context
+	CancelFunc     context.CancelFunc
+	WG             *sync.WaitGroup
+	Data           chan string
+	Error          chan string
+	PrevStage      *Stage
+	StageProcessor IStageProcessor
+}
+
+func NewStage(Name string, NoOfWorkers int, DoneWorkers uint64, WG *sync.WaitGroup, Data chan string, PrevStage *Stage, StageProcessor IStageProcessor) *Stage {
+	stage := &Stage{
+		Name:           Name,
+		NoOfWorkers:    NoOfWorkers,
+		DoneWorkers:    &DoneWorkers,
+		WG:             WG,
+		Data:           Data,
+		PrevStage:      PrevStage,
+		StageProcessor: StageProcessor,
 	}
-	return &stage
+	return stage
+}
+
+func (CurStage *Stage) RunStage() {
+	CurStage.StageProcessor.RunStageProcessor(CurStage)
 }

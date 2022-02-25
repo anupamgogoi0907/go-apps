@@ -6,6 +6,6 @@ import (
 )
 
 func TestStage(t *testing.T) {
-	p, _ := pipeline.NewPipeline("/Users/agogoi/softwares/wso2/AM/wso2am-3.2.0/repository/logs/wso2carbon.log", "")
+	p, _ := pipeline.NewPipeline("demo.log", "")
 	p.RunPipeline()
 }

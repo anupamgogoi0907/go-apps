@@ -2,8 +2,9 @@ package pipeline
 
 import (
 	"errors"
-	"fmt"
 	"github.com/anupamgogoi0907/go-apps/data-processor/pkg/stage"
+	"github.com/anupamgogoi0907/go-apps/data-processor/pkg/stage/processing"
+	"sync"
 )
 
 type Pipeline struct {
@@ -21,24 +22,17 @@ func NewPipeline(Input ...string) (*Pipeline, error) {
 }
 
 func (p *Pipeline) RunPipeline() error {
+	wg := &sync.WaitGroup{}
 
-	stageTwo := stage.NewStage("Stage2", func(curStage *stage.Stage) {
-		fmt.Println("Processing:", curStage.Name)
-		if curStage.Next != nil {
-			curStage.Next.Process(curStage.Next)
-		}
-	}, nil)
+	stageProcessor1 := processing.NewIngestProcessor(p.Input[0])
+	s1 := stage.NewStage("Ingest Data", 2, uint64(0), wg, make(chan string), nil, stageProcessor1)
+	s1.RunStage()
 
-	stageOne := stage.NewStage("Stage1", func(curStage *stage.Stage) {
-		fmt.Println("Processing:", curStage.Name)
-		path := p.Input[0]
-		ingest := stage.NewIngest(path, curStage.Data)
-		ingest.ReadFileConcurrently()
-		if curStage.Next != nil {
-			curStage.Next.Process(curStage.Next)
-		}
-	}, stageTwo)
+	stageProcessor2 := processing.NewTransformProcessor("")
+	s2 := stage.NewStage("Transform", 2, uint64(0), wg, make(chan string), s1, stageProcessor2)
+	s2.RunStage()
 
-	stageOne.Process(stageOne)
+	// Wait for all goroutines that belong to all stages to finish.
+	wg.Wait()
 	return nil
 }

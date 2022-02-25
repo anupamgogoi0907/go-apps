@@ -6,31 +6,29 @@ import (
 )
 
 type Stage struct {
-	NoOfWorkers int
-	DoneWorkers *uint64
-	Ctx         context.Context
-	CancelFunc  context.CancelFunc
-	WG          *sync.WaitGroup
-	Data        chan string
-	Error       chan string
-	Prev        *Stage
+	NoOfWorkers    int
+	DoneWorkers    *uint64
+	Ctx            context.Context
+	CancelFunc     context.CancelFunc
+	WG             *sync.WaitGroup
+	Data           chan string
+	Error          chan string
+	Prev           *Stage
+	StageProcessor IStageProcessor
 }
 
-func NewStage(NoOfWorkers int, DoneWorkers uint64, WG *sync.WaitGroup, Data chan string, Prev *Stage) *Stage {
+func NewStage(NoOfWorkers int, DoneWorkers uint64, WG *sync.WaitGroup, Data chan string, Prev *Stage, StageProcessor IStageProcessor) *Stage {
 	stage := &Stage{
-		NoOfWorkers: NoOfWorkers,
-		DoneWorkers: &DoneWorkers,
-		WG:          WG,
-		Data:        Data,
-		Prev:        Prev,
+		NoOfWorkers:    NoOfWorkers,
+		DoneWorkers:    &DoneWorkers,
+		WG:             WG,
+		Data:           Data,
+		Prev:           Prev,
+		StageProcessor: StageProcessor,
 	}
 	return stage
 }
 
-type StageOperation interface {
-	Init(prev *Stage)
-}
-
-func (cur *Stage) Run(op StageOperation) {
-	op.Init(cur.Prev)
+func (cur *Stage) Run() {
+	cur.StageProcessor.RunStageProcessor(cur)
 }

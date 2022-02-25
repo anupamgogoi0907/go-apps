@@ -21,7 +21,7 @@ func TestReadFileConcurrently(t *testing.T) {
 	//	time.Sleep(time.Second)
 	//	fmt.Println(<-data)
 	//}()
-	in := stage.NewIngest("demo.log")
+	in := stage.New("demo.log")
 	in.ReadFileConcurrently()
 }
 
@@ -89,7 +89,7 @@ func TestComposition(t *testing.T) {
 		Path:      "",
 		ChunkPool: nil,
 		TextPool:  nil,
-		S:         s1,
+		Cur:       s1,
 	}
-	assert.Equal(t, 100, in.S.NoOfWorkers)
+	assert.Equal(t, 100, in.Cur.NoOfWorkers)
 }

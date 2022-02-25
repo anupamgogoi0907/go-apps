@@ -16,13 +16,15 @@ type Ingest struct {
 	Path      string
 	ChunkPool *sync.Pool
 	TextPool  *sync.Pool
-	S         *Stage
+	Cur       *Stage
 }
 
-func (in *Ingest) Init(prev *Stage) {
-
+func (in *Ingest) RunStageProcessor(cur *Stage) {
+	in.Cur = cur
+	in.ReadFileConcurrently()
 }
-func NewIngest(path string, stage *Stage) *Ingest {
+
+func New(path ...string) *Ingest {
 	chunkPool := sync.Pool{New: func() interface{} {
 		chunk := chunk
 		return chunk
@@ -32,24 +34,23 @@ func NewIngest(path string, stage *Stage) *Ingest {
 		return text
 	}}
 
-	dataReader := &Ingest{
-		Path:      path,
+	in := &Ingest{
+		Path:      path[0],
 		ChunkPool: &chunkPool,
 		TextPool:  &textPool,
-		S:         stage,
 	}
-	return dataReader
+	return in
 }
 func (in *Ingest) ReadFileConcurrently() error {
 	offset := int64(0)
 
 	// Spawn workers number of goroutines.
-	for i := 1; i <= in.S.NoOfWorkers; i++ {
-		in.S.WG.Add(1)
+	for i := 1; i <= in.Cur.NoOfWorkers; i++ {
+		in.Cur.WG.Add(1)
 		go in.ReadFileConcurrentlyRoutine(i, offset)
 		offset = offset + int64(chunkSize)
 	}
-	in.S.WG.Wait()
+	in.Cur.WG.Wait()
 	return nil
 }
 func (in *Ingest) ReadFileConcurrentlyRoutine(workerId int, offset int64) error {
@@ -77,6 +78,6 @@ func (in *Ingest) ReadFileConcurrentlyRoutine(workerId int, offset int64) error 
 	in.ChunkPool.Put(chunk)
 	in.TextPool.Put(text)
 
-	in.S.WG.Done()
+	in.Cur.WG.Done()
 	return nil
 }

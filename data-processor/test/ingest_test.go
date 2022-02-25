@@ -18,8 +18,8 @@ var (
 )
 
 func TestReadFileConcurrently(t *testing.T) {
-	in := stage.NewStageProcessor("demo.log")
-	stage := stage.NewStage(2, uint64(0), &sync.WaitGroup{}, make(chan string), nil, in)
+	in := stage.NewStageProcessor(filePath)
+	stage := stage.NewStage(20, uint64(0), &sync.WaitGroup{}, make(chan string), nil, in)
 	in.RunStageProcessor(stage)
 }
 

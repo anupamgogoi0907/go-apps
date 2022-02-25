@@ -7,8 +7,14 @@ import (
 	"sync"
 )
 
+const (
+	kb = 1024
+	mb = kb * 1024
+	gb = mb * 1024
+)
+
 var (
-	chunkSize = 1
+	chunkSize = 10 * kb
 	chunk     = make([]byte, chunkSize)
 )
 

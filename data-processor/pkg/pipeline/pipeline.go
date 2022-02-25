@@ -21,9 +21,9 @@ func NewPipeline(Input ...string) (*Pipeline, error) {
 }
 
 func (p *Pipeline) RunPipeline() error {
-	stageProcessor1 := stage.New(p.Input[0])
+	stageProcessor1 := stage.NewStageProcessor(p.Input[0])
 	s1 := stage.NewStage(2, uint64(0), &sync.WaitGroup{}, make(chan string), nil, stageProcessor1)
-	s1.Run()
+	s1.RunStage()
 
 	return nil
 }

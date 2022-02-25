@@ -29,6 +29,6 @@ func NewStage(NoOfWorkers int, DoneWorkers uint64, WG *sync.WaitGroup, Data chan
 	return stage
 }
 
-func (cur *Stage) Run() {
+func (cur *Stage) RunStage() {
 	cur.StageProcessor.RunStageProcessor(cur)
 }

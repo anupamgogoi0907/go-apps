@@ -19,12 +19,7 @@ type Ingest struct {
 	Cur       *Stage
 }
 
-func (in *Ingest) RunStageProcessor(cur *Stage) {
-	in.Cur = cur
-	in.ReadFileConcurrently()
-}
-
-func New(path ...string) *Ingest {
+func NewStageProcessor(path ...string) *Ingest {
 	chunkPool := sync.Pool{New: func() interface{} {
 		chunk := chunk
 		return chunk
@@ -40,6 +35,11 @@ func New(path ...string) *Ingest {
 		TextPool:  &textPool,
 	}
 	return in
+}
+
+func (in *Ingest) RunStageProcessor(cur *Stage) {
+	in.Cur = cur
+	in.ReadFileConcurrently()
 }
 func (in *Ingest) ReadFileConcurrently() error {
 	offset := int64(0)

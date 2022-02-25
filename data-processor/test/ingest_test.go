@@ -21,7 +21,7 @@ func TestReadFileConcurrently(t *testing.T) {
 	//	time.Sleep(time.Second)
 	//	fmt.Println(<-data)
 	//}()
-	in := stage.New("demo.log")
+	in := stage.NewStageProcessor("demo.log")
 	in.ReadFileConcurrently()
 }
 

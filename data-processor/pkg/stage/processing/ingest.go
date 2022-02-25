@@ -16,7 +16,7 @@ const (
 )
 
 var (
-	chunkSize = 4
+	chunkSize = mb * 5
 	chunk     = make([]byte, chunkSize)
 )
 
@@ -51,6 +51,9 @@ func (in *Ingest) RunStageProcessor(CurStage *stage.Stage) {
 }
 func (in *Ingest) readFile() error {
 	offset := int64(0)
+
+	// Calculate no of necessary goroutines
+	in.CurStage.NoOfWorkers = in.getNoOfWorkers()
 
 	// Spawn workers number of goroutines.
 	for i := 1; i <= in.CurStage.NoOfWorkers; i++ {
@@ -89,4 +92,18 @@ func (in *Ingest) readFileRoutine(workerId int, offset int64) error {
 	in.CurStage.WG.Done()
 	atomic.AddUint64(in.CurStage.DoneWorkers, 1)
 	return nil
+}
+
+func (in *Ingest) getNoOfWorkers() int {
+	file, _ := os.Open(in.Path)
+	defer file.Close()
+	fi, _ := file.Stat()
+	fileSize := int(fi.Size())
+
+	NoOfWorkers := fileSize / chunkSize
+	if r := fileSize % chunkSize; r != 0 {
+		NoOfWorkers++
+	}
+	fmt.Printf(">>>>>>>>>> Stage:%s,Total Workers:%d\n", in.CurStage.Name, NoOfWorkers)
+	return NoOfWorkers
 }

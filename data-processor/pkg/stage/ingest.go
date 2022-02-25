@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	chunkSize = 10 * 1024
+	chunkSize = 1
 	chunk     = make([]byte, chunkSize)
 )
 
@@ -19,7 +19,7 @@ type Ingest struct {
 	Cur       *Stage
 }
 
-func NewStageProcessor(path ...string) *Ingest {
+func NewStageProcessor(args ...string) *Ingest {
 	chunkPool := sync.Pool{New: func() interface{} {
 		chunk := chunk
 		return chunk
@@ -30,7 +30,7 @@ func NewStageProcessor(path ...string) *Ingest {
 	}}
 
 	in := &Ingest{
-		Path:      path[0],
+		Path:      args[0],
 		ChunkPool: &chunkPool,
 		TextPool:  &textPool,
 	}
@@ -39,21 +39,21 @@ func NewStageProcessor(path ...string) *Ingest {
 
 func (in *Ingest) RunStageProcessor(cur *Stage) {
 	in.Cur = cur
-	in.ReadFileConcurrently()
+	in.readFileConcurrently()
 }
-func (in *Ingest) ReadFileConcurrently() error {
+func (in *Ingest) readFileConcurrently() error {
 	offset := int64(0)
 
 	// Spawn workers number of goroutines.
 	for i := 1; i <= in.Cur.NoOfWorkers; i++ {
 		in.Cur.WG.Add(1)
-		go in.ReadFileConcurrentlyRoutine(i, offset)
+		go in.readFileConcurrentlyRoutine(i, offset)
 		offset = offset + int64(chunkSize)
 	}
 	in.Cur.WG.Wait()
 	return nil
 }
-func (in *Ingest) ReadFileConcurrentlyRoutine(workerId int, offset int64) error {
+func (in *Ingest) readFileConcurrentlyRoutine(workerId int, offset int64) error {
 	file, _ := os.Open(in.Path)
 	defer file.Close()
 	file.Seek(offset, 0)

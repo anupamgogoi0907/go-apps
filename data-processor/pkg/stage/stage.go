@@ -38,17 +38,16 @@ func (CurStage *Stage) RunStage() {
 type StageBuilder interface {
 	Name(Name string) StageBuilder
 	NoOfWorkers(NoOfWorkers int) StageBuilder
-	DoneWorkers(DoneWorkers *uint64) StageBuilder
 	WG(WG *sync.WaitGroup) StageBuilder
 	Data(Data chan string) StageBuilder
 	PrevStage(PrevStage *Stage) StageBuilder
 	StageProcessor(StageProcessor IStageProcessor) StageBuilder
+	Build() *Stage
 }
 
 type stageBuilder struct {
 	name           string
 	noOfWorkers    int
-	doneWorkers    *uint64
 	ctx            context.Context
 	cancelFunc     context.CancelFunc
 	wg             *sync.WaitGroup
@@ -67,10 +66,7 @@ func (sb *stageBuilder) NoOfWorkers(NoOfWorkers int) StageBuilder {
 	sb.noOfWorkers = NoOfWorkers
 	return sb
 }
-func (sb *stageBuilder) DoneWorkers(DoneWorkers *uint64) StageBuilder {
-	sb.doneWorkers = DoneWorkers
-	return sb
-}
+
 func (sb *stageBuilder) WG(WG *sync.WaitGroup) StageBuilder {
 	sb.wg = WG
 	return sb
@@ -93,10 +89,11 @@ func NewStageBuilder() StageBuilder {
 }
 
 func (sb *stageBuilder) Build() *Stage {
+	doneWorkers := uint64(0)
 	stage := &Stage{
 		Name:           sb.name,
 		NoOfWorkers:    sb.noOfWorkers,
-		DoneWorkers:    sb.doneWorkers,
+		DoneWorkers:    &doneWorkers,
 		Ctx:            sb.ctx,
 		CancelFunc:     sb.cancelFunc,
 		WG:             sb.wg,

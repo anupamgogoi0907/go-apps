@@ -12,7 +12,7 @@ type Pipeline struct {
 }
 
 func NewPipeline(Input ...string) (*Pipeline, error) {
-	if Input == nil || len(Input) == 0 || len(Input) == 1 {
+	if Input == nil || len(Input) == 0 {
 		return nil, errors.New("no pipeline data provided")
 	}
 	pipeline := &Pipeline{
@@ -23,13 +23,14 @@ func NewPipeline(Input ...string) (*Pipeline, error) {
 
 func (p *Pipeline) RunPipeline() error {
 	wg := &sync.WaitGroup{}
+	builder := stage.NewStageBuilder()
 
 	stageProcessor1 := processor.NewIngestProcessor(p.Input[0])
-	s1 := stage.NewStage("Ingest Data", 0, uint64(0), wg, make(chan string), nil, stageProcessor1)
+	s1 := builder.Name("Ingest Data").WG(wg).NoOfWorkers(2).Data(make(chan string)).PrevStage(nil).StageProcessor(stageProcessor1).Build()
 	s1.RunStage()
 
 	stageProcessor2 := processor.NewTransformProcessor("")
-	s2 := stage.NewStage("Transform", 5, uint64(0), wg, nil, s1, stageProcessor2)
+	s2 := builder.Name("Transform").WG(wg).NoOfWorkers(2).Data(nil).PrevStage(s1).StageProcessor(stageProcessor2).Build()
 	s2.RunStage()
 
 	// Wait for all goroutines that belong to all stages to finish.

@@ -19,7 +19,7 @@ var (
 )
 
 func TestReadFileConcurrently(t *testing.T) {
-	stageProcessor := processor.NewIngestProcessor(filePath)
+	stageProcessor := processor.NewIngestProcessor("demo.log")
 	stage := stage.NewStage("Ingest", 10, uint64(0), &sync.WaitGroup{}, make(chan string), nil, stageProcessor)
 	stage.RunStage()
 }

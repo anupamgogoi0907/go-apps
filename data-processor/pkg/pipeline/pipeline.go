@@ -3,7 +3,7 @@ package pipeline
 import (
 	"errors"
 	"github.com/anupamgogoi0907/go-apps/data-processor/pkg/stage"
-	"github.com/anupamgogoi0907/go-apps/data-processor/pkg/stage/processing"
+	"github.com/anupamgogoi0907/go-apps/data-processor/pkg/stage/processor"
 	"sync"
 )
 
@@ -24,11 +24,11 @@ func NewPipeline(Input ...string) (*Pipeline, error) {
 func (p *Pipeline) RunPipeline() error {
 	wg := &sync.WaitGroup{}
 
-	stageProcessor1 := processing.NewIngestProcessor(p.Input[0])
+	stageProcessor1 := processor.NewIngestProcessor(p.Input[0])
 	s1 := stage.NewStage("Ingest Data", 0, uint64(0), wg, make(chan string), nil, stageProcessor1)
 	s1.RunStage()
 
-	stageProcessor2 := processing.NewTransformProcessor("")
+	stageProcessor2 := processor.NewTransformProcessor("")
 	s2 := stage.NewStage("Transform", 5, uint64(0), wg, nil, s1, stageProcessor2)
 	s2.RunStage()
 

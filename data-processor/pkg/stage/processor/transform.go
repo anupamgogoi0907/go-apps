@@ -9,13 +9,45 @@ import (
 )
 
 type Transform struct {
-	CurStage *stage.Stage
+	Input      []string
+	TargetPath string
+	CurStage   *stage.Stage
 }
 
-func NewTransformProcessor(args ...string) *Transform {
-	t := &Transform{}
+type TransformBuilder interface {
+	Input(Input ...string) TransformBuilder
+	TargetPath(TargetPath string) TransformBuilder
+	Build() *Transform
+}
+
+type transformBuilder struct {
+	input      []string
+	targetPath string
+	curStage   *stage.Stage
+}
+
+func (tb *transformBuilder) Input(Input ...string) TransformBuilder {
+	tb.input = Input
+	return tb
+}
+func (tb *transformBuilder) TargetPath(TargetPath string) TransformBuilder {
+	tb.targetPath = TargetPath
+	return tb
+}
+
+func (tb *transformBuilder) Build() *Transform {
+	t := &Transform{
+		Input:      tb.input,
+		TargetPath: tb.targetPath,
+	}
 	return t
 }
+
+func NewTransformBuilder() TransformBuilder {
+	tb := &transformBuilder{}
+	return tb
+}
+
 func (t *Transform) RunStageProcessor(curStage *stage.Stage) {
 	t.CurStage = curStage
 

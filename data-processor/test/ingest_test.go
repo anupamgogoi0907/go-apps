@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"os"
 	"strings"
-	"sync"
 	"testing"
 )
 
@@ -19,9 +18,7 @@ var (
 )
 
 func TestReadFileConcurrently(t *testing.T) {
-	stageProcessor := processor.NewIngestProcessor("demo.log")
-	stage := stage.NewStage("Ingest", 10, uint64(0), &sync.WaitGroup{}, make(chan string), nil, stageProcessor)
-	stage.RunStage()
+
 }
 
 func TestReadLineByLine(t *testing.T) {

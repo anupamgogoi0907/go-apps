@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/anupamgogoi0907/go-apps/data-processor/pkg/stage"
-	"github.com/anupamgogoi0907/go-apps/data-processor/pkg/stage/processor"
+	"github.com/anupamgogoi0907/go-apps/data-processor/pkg/stage/ingest"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"strings"
@@ -81,7 +81,7 @@ func TestComposition(t *testing.T) {
 		Data:        nil,
 		Error:       nil,
 	}
-	in := processor.Ingest{
+	in := ingest.Ingest{
 		Path:      "",
 		ChunkPool: nil,
 		TextPool:  nil,

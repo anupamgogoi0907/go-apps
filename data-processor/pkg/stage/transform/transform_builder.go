@@ -31,7 +31,7 @@ func (tb *transformBuilder) Build() *Transform {
 	return t
 }
 
-func NewTransformBuilder() TransformBuilder {
+func New() TransformBuilder {
 	tb := &transformBuilder{}
 	return tb
 }

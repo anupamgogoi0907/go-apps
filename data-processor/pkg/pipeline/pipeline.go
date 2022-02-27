@@ -26,11 +26,11 @@ func (p *Pipeline) RunPipeline() error {
 	wg := &sync.WaitGroup{}
 	builder := stage.NewStageBuilder()
 
-	stageProcessor1 := ingest.NewIngestProcessor(p.Input[0])
+	stageProcessor1 := ingest.New().Path(p.Input[0]).Build()
 	s1 := builder.Name("Ingest Data").WG(wg).NoOfWorkers(2).Data(make(chan string)).PrevStage(nil).StageProcessor(stageProcessor1).Build()
 	s1.RunStage()
 
-	stageProcessor2 := transform.NewTransformBuilder().TargetPath(p.Input[1]).Input(p.Input[2:]...).Build()
+	stageProcessor2 := transform.New().TargetPath(p.Input[1]).Input(p.Input[2:]...).Build()
 	s2 := builder.Name("Transform").WG(wg).NoOfWorkers(2).Data(nil).PrevStage(s1).StageProcessor(stageProcessor2).Build()
 	s2.RunStage()
 

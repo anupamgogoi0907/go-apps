@@ -27,24 +27,6 @@ type Ingest struct {
 	CurStage  *stage.Stage
 }
 
-func NewIngestProcessor(args ...string) *Ingest {
-	chunkPool := sync.Pool{New: func() interface{} {
-		chunk := chunk
-		return chunk
-	}}
-	textPool := sync.Pool{New: func() interface{} {
-		text := ""
-		return text
-	}}
-
-	in := &Ingest{
-		Path:      args[0],
-		ChunkPool: &chunkPool,
-		TextPool:  &textPool,
-	}
-	return in
-}
-
 func (in *Ingest) RunStageProcessor(CurStage *stage.Stage) {
 	in.CurStage = CurStage
 	in.readFile()

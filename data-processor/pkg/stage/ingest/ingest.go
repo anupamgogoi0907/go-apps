@@ -29,6 +29,7 @@ type Ingest struct {
 
 func (in *Ingest) RunStageProcessor(CurStage *stage.Stage) {
 	in.CurStage = CurStage
+	in.Path = string(CurStage.StageContext.StageData[0])
 	in.readFile()
 }
 func (in *Ingest) readFile() error {

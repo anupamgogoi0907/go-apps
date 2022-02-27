@@ -9,6 +9,7 @@ type StageBuilder interface {
 	Data(Data chan string) StageBuilder
 	PrevStage(PrevStage *Stage) StageBuilder
 	StageProcessor(StageProcessor IStageProcessor) StageBuilder
+	StageContext(StageContext *StageContext) StageBuilder
 	Build() *Stage
 }
 
@@ -19,6 +20,7 @@ type stageBuilder struct {
 	data           chan string
 	prevStage      *Stage
 	stageProcessor IStageProcessor
+	stageContext   *StageContext
 }
 
 func (sb *stageBuilder) Name(Name string) StageBuilder {
@@ -47,6 +49,10 @@ func (sb *stageBuilder) StageProcessor(StageProcessor IStageProcessor) StageBuil
 	sb.stageProcessor = StageProcessor
 	return sb
 }
+func (sb *stageBuilder) StageContext(StageContext *StageContext) StageBuilder {
+	sb.stageContext = StageContext
+	return sb
+}
 
 func NewStageBuilder() StageBuilder {
 	return &stageBuilder{}
@@ -62,6 +68,7 @@ func (sb *stageBuilder) Build() *Stage {
 		Data:           sb.data,
 		PrevStage:      sb.prevStage,
 		StageProcessor: sb.stageProcessor,
+		StageContext:   sb.stageContext,
 	}
 	return stage
 }

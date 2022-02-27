@@ -9,14 +9,19 @@ import (
 )
 
 type Transform struct {
-	Input      []string
-	TargetPath string
-	CurStage   *stage.Stage
+	SearchStrings []string
+	TargetPath    string
+	CurStage      *stage.Stage
 }
 
 func (t *Transform) RunStageProcessor(curStage *stage.Stage) {
+	t.TargetPath = curStage.StageContext.StageData[1]
+	t.SearchStrings = curStage.StageContext.StageData[2:]
 	t.CurStage = curStage
 
+	t.processData()
+}
+func (t *Transform) processData() {
 	worker := func(workerId int, t *Transform) {
 		flag := true
 		var file *os.File
@@ -31,8 +36,8 @@ func (t *Transform) RunStageProcessor(curStage *stage.Stage) {
 				fmt.Println(text)
 				file.WriteString(text)
 			default:
-				c := atomic.LoadUint64(curStage.PrevStage.DoneWorkers)
-				if int(c) == curStage.PrevStage.NoOfWorkers {
+				c := atomic.LoadUint64(t.CurStage.PrevStage.DoneWorkers)
+				if int(c) == t.CurStage.PrevStage.NoOfWorkers {
 					flag = false
 					fmt.Printf("<<<<<<<<<< DONE:Stage:%s, Worker:%d\n", t.CurStage.Name, workerId)
 					t.CurStage.WG.Done()
@@ -44,5 +49,4 @@ func (t *Transform) RunStageProcessor(curStage *stage.Stage) {
 		t.CurStage.WG.Add(1)
 		go worker(w, t)
 	}
-
 }

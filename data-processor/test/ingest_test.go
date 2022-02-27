@@ -95,3 +95,7 @@ func TestAppendFile(t *testing.T) {
 	file.WriteString("World")
 	file.Close()
 }
+
+func TestInterfaceToString(t *testing.T) {
+
+}

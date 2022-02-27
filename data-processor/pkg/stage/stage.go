@@ -12,6 +12,7 @@ type Stage struct {
 	Data           chan string
 	PrevStage      *Stage
 	StageProcessor IStageProcessor
+	StageContext   *StageContext
 }
 
 func (CurStage *Stage) RunStage() {

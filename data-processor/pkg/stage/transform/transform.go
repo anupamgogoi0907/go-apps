@@ -40,13 +40,13 @@ func (t *Transform) processData() {
 				if int(c) == t.CurStage.PrevStage.NoOfWorkers {
 					flag = false
 					fmt.Printf("<<<<<<<<<< DONE:Stage:%s, Worker:%d\n", t.CurStage.Name, workerId)
-					t.CurStage.WG.Done()
+					t.CurStage.StageContext.WG.Done()
 				}
 			}
 		}
 	}
 	for w := 1; w <= t.CurStage.NoOfWorkers; w++ {
-		t.CurStage.WG.Add(1)
+		t.CurStage.StageContext.WG.Add(1)
 		go worker(w, t)
 	}
 }

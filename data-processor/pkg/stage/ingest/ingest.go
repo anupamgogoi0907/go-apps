@@ -40,7 +40,7 @@ func (in *Ingest) readFile() error {
 
 	// Spawn workers number of goroutines.
 	for i := 1; i <= in.CurStage.NoOfWorkers; i++ {
-		in.CurStage.WG.Add(1)
+		in.CurStage.StageContext.WG.Add(1)
 		go in.readFileRoutine(i, offset)
 		offset = offset + int64(chunkSize)
 	}
@@ -72,7 +72,7 @@ func (in *Ingest) readFileRoutine(workerId int, offset int64) error {
 	in.ChunkPool.Put(chunk)
 	in.TextPool.Put(text)
 
-	in.CurStage.WG.Done()
+	in.CurStage.StageContext.WG.Done()
 	atomic.AddUint64(in.CurStage.DoneWorkers, 1)
 	return nil
 }

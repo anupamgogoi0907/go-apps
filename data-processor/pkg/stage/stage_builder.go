@@ -5,7 +5,6 @@ import "sync"
 type StageBuilder interface {
 	Name(Name string) StageBuilder
 	NoOfWorkers(NoOfWorkers int) StageBuilder
-	WG(WG *sync.WaitGroup) StageBuilder
 	PrevStage(PrevStage *Stage) StageBuilder
 	StageProcessor(StageProcessor IStageProcessor) StageBuilder
 	StageContext(StageContext *StageContext) StageBuilder
@@ -28,11 +27,6 @@ func (sb *stageBuilder) Name(Name string) StageBuilder {
 
 func (sb *stageBuilder) NoOfWorkers(NoOfWorkers int) StageBuilder {
 	sb.noOfWorkers = NoOfWorkers
-	return sb
-}
-
-func (sb *stageBuilder) WG(WG *sync.WaitGroup) StageBuilder {
-	sb.wg = WG
 	return sb
 }
 
@@ -59,7 +53,6 @@ func (sb *stageBuilder) Build() *Stage {
 		Name:           sb.name,
 		NoOfWorkers:    sb.noOfWorkers,
 		DoneWorkers:    &doneWorkers,
-		WG:             sb.wg,
 		Data:           data,
 		PrevStage:      sb.prevStage,
 		StageProcessor: sb.stageProcessor,

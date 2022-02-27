@@ -75,7 +75,6 @@ func TestComposition(t *testing.T) {
 	s1 := &stage.Stage{
 		NoOfWorkers: 100,
 		DoneWorkers: nil,
-		WG:          nil,
 		Data:        nil,
 	}
 	in := ingest.Ingest{

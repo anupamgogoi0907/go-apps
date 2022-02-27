@@ -25,15 +25,15 @@ func NewPipeline(Input ...string) (*Pipeline, error) {
 func (p *Pipeline) RunPipeline() error {
 	wg := &sync.WaitGroup{}
 
-	sc := stage.NewStageContextBuilder().StageData(p.Input).Build()
+	sc := stage.NewStageContextBuilder().WG(wg).StageData(p.Input).Build()
 	sb := stage.NewStageBuilder()
 
 	stageProcessor1 := ingest.New().Build()
-	s1 := sb.Name("Ingest Data").WG(wg).NoOfWorkers(2).PrevStage(nil).StageProcessor(stageProcessor1).StageContext(sc).Build()
+	s1 := sb.Name("Ingest Data").NoOfWorkers(2).PrevStage(nil).StageProcessor(stageProcessor1).StageContext(sc).Build()
 	s1.RunStage()
 
 	stageProcessor2 := transform.New().Build()
-	s2 := sb.Name("Transform").WG(wg).NoOfWorkers(2).PrevStage(s1).StageProcessor(stageProcessor2).StageContext(sc).Build()
+	s2 := sb.Name("Transform").NoOfWorkers(2).PrevStage(s1).StageProcessor(stageProcessor2).StageContext(sc).Build()
 	s2.RunStage()
 
 	// Wait for all goroutines that belong to all stages to finish.

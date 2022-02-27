@@ -1,0 +1,6 @@
+stages:
+  1:
+    name: Ingest
+    chunkSize:5
+  2:
+    name: Transform

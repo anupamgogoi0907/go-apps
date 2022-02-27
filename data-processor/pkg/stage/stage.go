@@ -1,7 +1,6 @@
 package stage
 
 import (
-	"context"
 	"sync"
 )
 
@@ -9,11 +8,8 @@ type Stage struct {
 	Name           string
 	NoOfWorkers    int
 	DoneWorkers    *uint64
-	Ctx            context.Context
-	CancelFunc     context.CancelFunc
 	WG             *sync.WaitGroup
 	Data           chan string
-	Error          chan string
 	PrevStage      *Stage
 	StageProcessor IStageProcessor
 }
@@ -35,11 +31,8 @@ type StageBuilder interface {
 type stageBuilder struct {
 	name           string
 	noOfWorkers    int
-	ctx            context.Context
-	cancelFunc     context.CancelFunc
 	wg             *sync.WaitGroup
 	data           chan string
-	error          chan string
 	prevStage      *Stage
 	stageProcessor IStageProcessor
 }
@@ -81,11 +74,8 @@ func (sb *stageBuilder) Build() *Stage {
 		Name:           sb.name,
 		NoOfWorkers:    sb.noOfWorkers,
 		DoneWorkers:    &doneWorkers,
-		Ctx:            sb.ctx,
-		CancelFunc:     sb.cancelFunc,
 		WG:             sb.wg,
 		Data:           sb.data,
-		Error:          sb.error,
 		PrevStage:      sb.prevStage,
 		StageProcessor: sb.stageProcessor,
 	}

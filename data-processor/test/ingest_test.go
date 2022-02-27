@@ -75,11 +75,8 @@ func TestComposition(t *testing.T) {
 	s1 := &stage.Stage{
 		NoOfWorkers: 100,
 		DoneWorkers: nil,
-		Ctx:         nil,
-		CancelFunc:  nil,
 		WG:          nil,
 		Data:        nil,
-		Error:       nil,
 	}
 	in := ingest.Ingest{
 		Path:      "",

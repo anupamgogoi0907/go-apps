@@ -1,10 +1,12 @@
 package transform
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/anupamgogoi0907/go-apps/data-processor/pkg/stage"
+	"github.com/anupamgogoi0907/go-apps/data-processor/pkg/utility"
 	"os"
-	"strconv"
+	"strings"
 	"sync/atomic"
 )
 
@@ -22,31 +24,66 @@ func (t *Transform) RunStageProcessor(curStage *stage.Stage) {
 	t.processData()
 }
 func (t *Transform) processData() {
-	worker := func(workerId int, t *Transform) {
+	worker := func(workerId int, mapKeyFile map[string]*os.File, t *Transform) {
 		flag := true
-		var file *os.File
-		filePath := t.TargetPath + strconv.Itoa(workerId) + ".log"
-
 		for flag {
 			select {
 			case text := <-t.CurStage.PrevStage.Data:
-				file, _ = os.Create(filePath)
-				defer file.Close()
 				fmt.Printf("<<<<<<<<<< Stage:%s, Worker:%d\n", t.CurStage.Name, workerId)
 				fmt.Println(text)
-				file.WriteString(text)
+				t.searchStringInText(text, mapKeyFile)
 			default:
 				c := atomic.LoadUint64(t.CurStage.PrevStage.DoneWorkers)
 				if int(c) == t.CurStage.PrevStage.NoOfWorkers {
 					flag = false
 					fmt.Printf("<<<<<<<<<< DONE:Stage:%s, Worker:%d\n", t.CurStage.Name, workerId)
 					t.CurStage.StageContext.WG.Done()
+
+					// Close files.
+					if mapKeyFile != nil {
+						for _, v := range mapKeyFile {
+							v.Close()
+						}
+					}
 				}
 			}
 		}
 	}
+
+	mapKeyFile := t.createFilePerSearchKey()
 	for w := 1; w <= t.CurStage.NoOfWorkers; w++ {
 		t.CurStage.StageContext.WG.Add(1)
-		go worker(w, t)
+		go worker(w, mapKeyFile, t)
+	}
+}
+func (t *Transform) createFilePerSearchKey() map[string]*os.File {
+	err := utility.CreateDir(t.TargetPath)
+	if err != nil {
+		return nil
+	}
+	mapKeyFile := make(map[string]*os.File)
+	for i := 0; i < len(t.SearchStrings); i++ {
+		s := t.SearchStrings[i]
+		filePath := t.TargetPath + s + ".log"
+
+		// Create file.
+		f, _ := os.Create(filePath)
+		mapKeyFile[s] = f
+	}
+	return mapKeyFile
+}
+
+func (t *Transform) searchStringInText(text string, m map[string]*os.File) {
+	scanner := bufio.NewScanner(strings.NewReader(text))
+	scanner.Split(bufio.ScanLines)
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		for k, v := range m {
+			if strings.Contains(line, k) {
+				fmt.Println("$$$$$$$$$$$ Writing", k)
+				v.WriteString(line)
+			}
+		}
 	}
 }

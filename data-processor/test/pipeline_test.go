@@ -6,6 +6,6 @@ import (
 )
 
 func TestStage(t *testing.T) {
-	p, _ := pipeline.NewPipeline("demo.log", "/Users/agogoi/Downloads/test/", "search strijng")
+	p, _ := pipeline.NewPipeline("demo.log", "/Users/agogoi/Downloads/test/", "a", "b")
 	p.RunPipeline()
 }

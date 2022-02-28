@@ -27,6 +27,41 @@ The processing logic is to **search** for some **keywords** proved to the pipeli
 it will generate respective **file** as **output** and append data that contains the particular **keyword**.
 
 
+# Configurations
+In the root of the application, there is a **config.yaml** where the configurations can be provided for the pipeline.
+```
+stages:
+  1:
+    name: Ingest
+    chunksizestring: 10MB
+  2:
+    name: Transform
+    noworkers: 20
+```
+
+# Building the application.
+Navigate to the **/cmd** directory of the application and execute the below command.
+```
+$ go build  -o ../exe 
+```
+
+It will create an executable file in the **/exe** directory. Copy the **config.yaml** to the directory and execute the below command
+
+```
+$ ./app ARG1 ARG2 ARG3 ARG4 .... ARGn
+```
+
+| ARG         | DESCRIPTION                                                            |
+|-------------|------------------------------------------------------------------------|
+| ARG1        | The file to process.                                                   |
+| ARG2        | The target folder where the output should go.                          |
+| ARG3...ARGn | The search string/s that are to be searched in the input file i.e ARG1 |
+
+Below is an example:
+```
+$ /app /Users/agogoi/Downloads/wso2carbon.log /Users/agogoi/Downloads/test/ Error
+```
+
 # Load Testing.
 
 

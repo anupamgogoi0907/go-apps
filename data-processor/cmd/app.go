@@ -5,10 +5,14 @@ import (
 	"github.com/anupamgogoi0907/go-apps/data-processor/config"
 	"github.com/anupamgogoi0907/go-apps/data-processor/pkg/pipeline"
 	"github.com/spf13/viper"
+	"log"
 	"os"
+	"time"
 )
 
 func main() {
+	log.Println("Starting pipeline...")
+	start := time.Now()
 
 	appConfig := loadConfig()
 	config.SetAppConfig(appConfig)
@@ -18,6 +22,8 @@ func main() {
 	if err == nil {
 		p.RunPipeline()
 	}
+	elapsed := time.Since(start)
+	log.Print("Finishing pipeline.Time taken:%s\n", elapsed)
 }
 
 func loadConfig() (appConfig config.AppConfig) {

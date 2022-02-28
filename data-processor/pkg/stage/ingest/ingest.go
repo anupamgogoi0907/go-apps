@@ -77,6 +77,6 @@ func (in *Ingest) getNoOfWorkers() int {
 	if r := fileSize % in.ChunkSize; r != 0 {
 		NoOfWorkers++
 	}
-	log.Printf(">>>>>>>>>> Stage:%s,Total Workers:%d\n", in.CurStage.Name, NoOfWorkers)
+	log.Printf("########## Stage:%s,File Size:%d,Total Workers:%d\n", in.CurStage.Name, fileSize, NoOfWorkers)
 	return NoOfWorkers
 }

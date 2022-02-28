@@ -50,6 +50,7 @@ func (t *Transform) processData() {
 		}
 	}
 
+	log.Printf("########## Stage:%s,Total Workers:%d\n", t.CurStage.Name, t.CurStage.NoOfWorkers)
 	mapKeyFile := t.createFilePerSearchKey()
 	for w := 1; w <= t.CurStage.NoOfWorkers; w++ {
 		t.CurStage.StageContext.WG.Add(1)

@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	filePath  = "/Users/agogoi/softwares/wso2/AM/wso2am-3.2.0/repository/logs/wso2carbon.log"
+	filePath  = "demo.log"
 	chunkSize = 1024
 	chunk     = make([]byte, chunkSize)
 )
@@ -87,7 +87,7 @@ func TestComposition(t *testing.T) {
 }
 
 func TestAppendFile(t *testing.T) {
-	file, _ := os.Create("/Users/agogoi/Downloads/demo.log")
+	file, _ := os.Create("/tmp/demo.log")
 
 	file.WriteString("Hello\n")
 	file.WriteString("World")

@@ -64,7 +64,19 @@ $ /app /Users/agogoi/Downloads/wso2carbon.log /Users/agogoi/Downloads/test/ Erro
 
 # Load Testing.
 
+For an input file of size **132MB** and below worker configuration the app took **171ms** to search for a keyword.
+Please check the screenshot below.
+```
+stages:
+  1:
+    name: Ingest
+    chunksizestring: 10MB
+  2:
+    name: Transform
+    noworkers: 20
+```
 
+![](./doc/performance_test.png "Architecture").
 
 
 

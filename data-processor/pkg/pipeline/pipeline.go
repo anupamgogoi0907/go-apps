@@ -27,17 +27,17 @@ func (p *Pipeline) RunPipeline() error {
 	wg := &sync.WaitGroup{}
 	appConfig := config.GetAppConfig()
 
-	sc := stage.NewStageContextBuilder().WG(wg).StageData(p.Input).Build()
+	stageContext := stage.NewStageContextBuilder().WG(wg).StageData(p.Input).Build()
 	sb := stage.NewStageBuilder()
 
-	// Configure stage1
+	// Configure stage1.Workers are calculated based on chunk-size.
 	stageProcessor1 := ingest.New().ChunkSize(appConfig.Stages[1].Chunksize).Build()
-	s1 := sb.Name(appConfig.Stages[1].Name).PrevStage(nil).StageProcessor(stageProcessor1).StageContext(sc).Build()
+	s1 := sb.Name(appConfig.Stages[1].Name).PrevStage(nil).StageProcessor(stageProcessor1).StageContext(stageContext).Build()
 	s1.RunStage()
 
 	// Configure stage2
 	stageProcessor2 := transform.New().Build()
-	s2 := sb.Name(appConfig.Stages[2].Name).NoOfWorkers(2).PrevStage(s1).StageProcessor(stageProcessor2).StageContext(sc).Build()
+	s2 := sb.Name(appConfig.Stages[2].Name).NoOfWorkers(appConfig.Stages[2].Noworkers).PrevStage(s1).StageProcessor(stageProcessor2).StageContext(stageContext).Build()
 	s2.RunStage()
 
 	// Wait for all goroutines that belong to all stages to finish.

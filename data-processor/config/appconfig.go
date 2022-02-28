@@ -7,6 +7,7 @@ import (
 type StageConfig struct {
 	Name      string
 	Chunksize int
+	Noworkers int
 }
 type AppConfig struct {
 	Stages map[int]StageConfig

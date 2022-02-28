@@ -4,3 +4,4 @@ stages:
     chunksize: 5
   2:
     name: Transform
+    noworkers: 3

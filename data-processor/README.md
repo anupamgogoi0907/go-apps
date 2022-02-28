@@ -62,7 +62,7 @@ Below is an example:
 $ /app /Users/agogoi/Downloads/wso2carbon.log /Users/agogoi/Downloads/test/ Error
 ```
 
-# Load Testing.
+# Load Testing
 
 For an input file of size **132MB** and below worker configuration the app took **171ms** to search for a keyword.
 Please check the screenshot below.

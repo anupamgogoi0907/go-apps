@@ -30,7 +30,7 @@ func (t *Transform) processData() {
 			select {
 			case text := <-t.CurStage.PrevStage.Data:
 				log.Printf("<<<<<<<<<< Stage:%s, Worker:%d\n", t.CurStage.Name, workerId)
-				log.Println(text)
+				//log.Println(text)
 				t.searchStringInText(text, mapKeyFile)
 			default:
 				c := atomic.LoadUint64(t.CurStage.PrevStage.DoneWorkers)
@@ -82,7 +82,7 @@ func (t *Transform) searchStringInText(text string, m map[string]*os.File) {
 		for k, v := range m {
 			if strings.Contains(line, k) {
 				log.Println("$$$$$$$$$$$ Writing", k)
-				v.WriteString(line)
+				v.WriteString(line + "\n")
 			}
 		}
 	}

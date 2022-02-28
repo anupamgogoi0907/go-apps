@@ -23,7 +23,7 @@ func main() {
 		p.RunPipeline()
 	}
 	elapsed := time.Since(start)
-	log.Print("Finishing pipeline.Time taken:%s\n", elapsed)
+	log.Printf("Finishing pipeline.Time taken:%s\n", elapsed)
 }
 
 func loadConfig() (appConfig config.AppConfig) {

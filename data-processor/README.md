@@ -42,7 +42,7 @@ stages:
 # Building the application.
 Navigate to the **/cmd** directory of the application and execute the below command.
 ```
-$ go build  -o ../exe 
+$ go build -o ../exe/app
 ```
 
 It will create an executable file in the **/exe** directory. Copy the **config.yaml** to the directory and execute the below command

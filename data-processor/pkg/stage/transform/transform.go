@@ -83,7 +83,7 @@ func (t *Transform) searchStringInText(text string, m map[string]*os.File) {
 		line := scanner.Text()
 		for k, v := range m {
 			if strings.Contains(line, k) {
-				log.Println("$$$$$$$$$$$ Writing to file:", k)
+				//log.Println("$$$$$$$$$$$ Writing to file:", k)
 				v.WriteString(line + "\n")
 			}
 		}

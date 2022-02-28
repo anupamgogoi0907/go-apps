@@ -1,0 +1,7 @@
+stages:
+  1:
+    name: Ingest
+    chunksizestring: 10MB
+  2:
+    name: Transform
+    noworkers: 20

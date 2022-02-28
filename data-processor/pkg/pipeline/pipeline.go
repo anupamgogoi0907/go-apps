@@ -31,12 +31,11 @@ func (p *Pipeline) RunPipeline() error {
 	sb := stage.NewStageBuilder()
 
 	// Configure stage1
-	stageProcessor1 := ingest.New().Build()
-	s1 := sb.Name(appConfig.Stages[1].Name).NoOfWorkers(2).PrevStage(nil).StageProcessor(stageProcessor1).StageContext(sc).Build()
+	stageProcessor1 := ingest.New().ChunkSize(appConfig.Stages[1].Chunksize).Build()
+	s1 := sb.Name(appConfig.Stages[1].Name).PrevStage(nil).StageProcessor(stageProcessor1).StageContext(sc).Build()
 	s1.RunStage()
 
 	// Configure stage2
-
 	stageProcessor2 := transform.New().Build()
 	s2 := sb.Name(appConfig.Stages[2].Name).NoOfWorkers(2).PrevStage(s1).StageProcessor(stageProcessor2).StageContext(sc).Build()
 	s2.RunStage()

@@ -21,10 +21,10 @@ func main() {
 }
 
 func loadConfig() (appConfig config.AppConfig) {
-	viper.SetConfigName("appConfig")
+	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
 	viper.AutomaticEnv()
-	viper.SetConfigType("yml")
+	viper.SetConfigType("yaml")
 
 	if err := viper.ReadInConfig(); err != nil {
 		fmt.Printf("Error reading appConfig file, %s", err)

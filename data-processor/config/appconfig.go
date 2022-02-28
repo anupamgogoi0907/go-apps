@@ -1,5 +1,9 @@
 package config
 
+import (
+	"log"
+)
+
 type StageConfig struct {
 	Name      string
 	Chunksize int
@@ -10,8 +14,9 @@ type AppConfig struct {
 
 var appConfig AppConfig
 
-func SetAppConfig(appConfig AppConfig) {
-	appConfig = appConfig
+func SetAppConfig(cfg AppConfig) {
+	appConfig = cfg
+	log.Println("Config file loaded.")
 }
 
 func GetAppConfig() AppConfig {

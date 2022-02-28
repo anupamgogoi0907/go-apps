@@ -9,19 +9,9 @@ import (
 	"sync/atomic"
 )
 
-const (
-	kb = 1024
-	mb = kb * 1024
-	gb = mb * 1024
-)
-
-var (
-	chunkSize = 5
-	chunk     = make([]byte, chunkSize)
-)
-
 type Ingest struct {
 	Path      string
+	ChunkSize int
 	ChunkPool *sync.Pool
 	TextPool  *sync.Pool
 	CurStage  *stage.Stage
@@ -42,7 +32,7 @@ func (in *Ingest) readFile() error {
 	for i := 1; i <= in.CurStage.NoOfWorkers; i++ {
 		in.CurStage.StageContext.WG.Add(1)
 		go in.readFileRoutine(i, offset)
-		offset = offset + int64(chunkSize)
+		offset = offset + int64(in.ChunkSize)
 	}
 	return nil
 }
@@ -83,8 +73,8 @@ func (in *Ingest) getNoOfWorkers() int {
 	fi, _ := file.Stat()
 	fileSize := int(fi.Size())
 
-	NoOfWorkers := fileSize / chunkSize
-	if r := fileSize % chunkSize; r != 0 {
+	NoOfWorkers := fileSize / in.ChunkSize
+	if r := fileSize % in.ChunkSize; r != 0 {
 		NoOfWorkers++
 	}
 	fmt.Printf(">>>>>>>>>> Stage:%s,Total Workers:%d\n", in.CurStage.Name, NoOfWorkers)

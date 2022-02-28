@@ -2,8 +2,8 @@ package ingest
 
 import (
 	"bufio"
-	"fmt"
 	"github.com/anupamgogoi0907/go-apps/data-processor/pkg/stage"
+	"log"
 	"os"
 	"sync"
 	"sync/atomic"
@@ -50,11 +50,11 @@ func (in *Ingest) readFileRoutine(workerId int, offset int64) error {
 	nBytes, err := reader.Read(chunk)
 
 	if err != nil {
-		fmt.Printf(">>>>>>>>>> Stage:%s, Worker:%d, Offset:%d\n", in.CurStage.Name, workerId, offset)
-		fmt.Println(err)
+		log.Printf(">>>>>>>>>> Stage:%s, Worker:%d, Offset:%d\n", in.CurStage.Name, workerId, offset)
+		log.Println(err)
 	} else {
 		text = string(chunk[0:nBytes])
-		fmt.Printf(">>>>>>>>>> Stage:%s, Worker:%d, Offset:%d\n", in.CurStage.Name, workerId, offset)
+		log.Printf(">>>>>>>>>> Stage:%s, Worker:%d, Offset:%d\n", in.CurStage.Name, workerId, offset)
 		in.CurStage.Data <- text
 	}
 
@@ -77,6 +77,6 @@ func (in *Ingest) getNoOfWorkers() int {
 	if r := fileSize % in.ChunkSize; r != 0 {
 		NoOfWorkers++
 	}
-	fmt.Printf(">>>>>>>>>> Stage:%s,Total Workers:%d\n", in.CurStage.Name, NoOfWorkers)
+	log.Printf(">>>>>>>>>> Stage:%s,Total Workers:%d\n", in.CurStage.Name, NoOfWorkers)
 	return NoOfWorkers
 }

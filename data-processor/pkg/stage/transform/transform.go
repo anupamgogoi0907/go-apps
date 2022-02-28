@@ -2,9 +2,9 @@ package transform
 
 import (
 	"bufio"
-	"fmt"
 	"github.com/anupamgogoi0907/go-apps/data-processor/pkg/stage"
 	"github.com/anupamgogoi0907/go-apps/data-processor/pkg/utility"
+	"log"
 	"os"
 	"strings"
 	"sync/atomic"
@@ -29,14 +29,14 @@ func (t *Transform) processData() {
 		for flag {
 			select {
 			case text := <-t.CurStage.PrevStage.Data:
-				fmt.Printf("<<<<<<<<<< Stage:%s, Worker:%d\n", t.CurStage.Name, workerId)
-				fmt.Println(text)
+				log.Printf("<<<<<<<<<< Stage:%s, Worker:%d\n", t.CurStage.Name, workerId)
+				log.Println(text)
 				t.searchStringInText(text, mapKeyFile)
 			default:
 				c := atomic.LoadUint64(t.CurStage.PrevStage.DoneWorkers)
 				if int(c) == t.CurStage.PrevStage.NoOfWorkers {
 					flag = false
-					fmt.Printf("<<<<<<<<<< DONE:Stage:%s, Worker:%d\n", t.CurStage.Name, workerId)
+					log.Printf("<<<<<<<<<< DONE:Stage:%s, Worker:%d\n", t.CurStage.Name, workerId)
 					t.CurStage.StageContext.WG.Done()
 
 					// Close files.
@@ -81,7 +81,7 @@ func (t *Transform) searchStringInText(text string, m map[string]*os.File) {
 		line := scanner.Text()
 		for k, v := range m {
 			if strings.Contains(line, k) {
-				fmt.Println("$$$$$$$$$$$ Writing", k)
+				log.Println("$$$$$$$$$$$ Writing", k)
 				v.WriteString(line)
 			}
 		}
